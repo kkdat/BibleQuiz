@@ -12,24 +12,30 @@
             background: radial-gradient(circle at top left, #2e1065, #0f172a);
             min-height: 100vh;
         }
+        /* Refined lighter glass effect */
         .glass {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
+        /* Lighter, elevated card style */
         .glass-card {
-            background: rgba(88, 28, 135, 0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(167, 139, 250, 0.15);
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+        /* Sublte purple tint to separate teams */
+        .team-card {
+            background: rgba(167, 139, 250, 0.08);
+            border-color: rgba(167, 139, 250, 0.2);
         }
         .text-gradient {
             background: linear-gradient(to right, #c084fc, #818cf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-        .btn-pill {
-            @apply bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold py-2 rounded-lg transition-all active:scale-90 shadow-md;
         }
     </style>
 </head>
@@ -62,8 +68,8 @@
                 
                 teams.forEach(team => {
                     document.write(`
-                    <div class="glass-card rounded-[2rem] p-5 text-center relative overflow-hidden group">
-                        <h2 class="text-[10px] font-bold text-purple-400 mb-1 uppercase tracking-widest opacity-80">${team}</h2>
+                    <div class="glass-card team-card rounded-[2rem] p-5 text-center relative overflow-hidden group">
+                        <h2 class="text-[10px] font-bold text-purple-300 mb-1 uppercase tracking-widest opacity-80">${team}</h2>
                         <div id="score-${team}" class="text-5xl font-black text-white mb-4 tracking-tighter tabular-nums">0</div>
                         
                         <div class="grid grid-cols-3 gap-2 mb-4">
@@ -74,7 +80,7 @@
                             `).join('')}
                         </div>
                         
-                        <div class="flex flex-col gap-2 border-t border-white/5 pt-4">
+                        <div class="flex flex-col gap-2 border-t border-white/10 pt-4">
                              <button onclick="pushUpdate('${team}', 20)" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 text-xs rounded-xl font-black transition-all active:scale-95">
                                 BONUS +20
                             </button>
