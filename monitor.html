@@ -2,52 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Monitor - Bible Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Monitor - Bible Quiz Pro</title>
     <style>
-        @keyframes reveal-bounce {
-            0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #2e1065, #0f172a);
+            min-height: 100vh;
+            color: #f8fafc;
         }
-        .reveal-anim { animation: reveal-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .text-gradient-purple {
+            background: linear-gradient(to right, #c084fc, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes reveal-pop {
+            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .reveal-anim { 
+            animation: reveal-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+
+        /* Custom scrollbar for leaderboard */
+        #leaderboard::-webkit-scrollbar { width: 4px; }
+        #leaderboard::-webkit-scrollbar-track { background: transparent; }
+        #leaderboard::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); border-radius: 10px; }
     </style>
 </head>
-<body class="bg-black text-white p-12 overflow-hidden font-sans">
+<body class="p-8 md:p-16 overflow-hidden">
     
-    <div class="flex justify-between items-center mb-10 border-b-2 border-slate-900 pb-8">
+    <div class="flex justify-between items-end mb-16 border-b border-white/10 pb-10">
         <div>
-            <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black text-2xl">Bible Quiz Arena</h1>
-            <p id="status-tag" class="text-slate-500 font-mono text-sm uppercase tracking-widest">Live Broadcast Mode</p>
+            <h1 class="text-gradient-purple uppercase tracking-[0.4em] font-extrabold text-3xl">Bible Quiz Arena</h1>
+            <div class="flex items-center gap-3 mt-2">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                </span>
+                <p id="status-tag" class="text-purple-300/60 font-medium text-xs uppercase tracking-[0.2em]">Live Signal: Encrypted</p>
+            </div>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span class="text-slate-400 font-bold text-sm uppercase">Connection Active</span>
+        <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
+            <span class="text-white/40 text-xs font-bold uppercase tracking-widest">Global Status</span>
+            <span class="text-emerald-400 font-black text-sm uppercase">Active</span>
         </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-12 h-[70vh] items-start">
-        <div class="col-span-8 flex flex-col justify-center h-full pr-10 border-r-4 border-slate-900 relative">
-            <div id="mon-q" class="text-7xl font-black leading-tight text-white drop-shadow-2xl transition-all duration-500">
+    <div class="grid grid-cols-12 gap-16 h-[65vh] items-start">
+        
+        <div class="col-span-8 flex flex-col justify-center h-full relative pr-4">
+            <div id="mon-pts" class="mb-6 text-xl text-purple-400 font-bold hidden uppercase tracking-[0.3em] bg-purple-500/10 w-fit px-5 py-1.5 rounded-full border border-purple-500/20">
+                0 POINTS
+            </div>
+            
+            <div id="mon-q" class="text-6xl md:text-7xl font-extrabold leading-[1.15] text-white transition-all duration-700 ease-out">
                 Ready for the next Box...
             </div>
             
-            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500 font-bold hidden uppercase tracking-[0.2em] bg-yellow-500/10 w-fit px-6 py-2 rounded-lg border border-yellow-500/20">
-                0 POINTS
-            </div>
-
-            <div id="mon-ans-container" class="absolute inset-0 bg-black/60 backdrop-blur-md hidden flex-col items-center justify-center text-center p-6 rounded-3xl border-4 border-green-500 reveal-anim z-10">
-                <span class="text-green-500 font-black tracking-widest uppercase text-2xl mb-4">Correct Answer</span>
-                <div id="mon-ans-text" class="text-8xl font-black text-white drop-shadow-[0_0_30px_rgba(34,197,94,0.6)] uppercase">
+            <div id="mon-ans-container" class="absolute inset-0 glass bg-purple-950/40 hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border-purple-500/40 reveal-anim z-20 shadow-[0_0_100px_rgba(168,85,247,0.15)]">
+                <span class="text-emerald-400 font-bold tracking-[0.4em] uppercase text-sm mb-6 bg-emerald-500/10 px-4 py-1 rounded-full border border-emerald-500/20">Correct Revelation</span>
+                <div id="mon-ans-text" class="text-7xl md:text-9xl font-black text-white drop-shadow-[0_0_50px_rgba(255,255,255,0.3)] uppercase tracking-tight">
                     ---
                 </div>
             </div>
         </div>
         
-        <div class="col-span-4 flex flex-col h-full">
-            <h1 class="text-blue-500 uppercase tracking-widest font-black mb-8 text-xl border-b-2 border-blue-900 pb-4">Rankings</h1>
-            <div id="leaderboard" class="space-y-6 overflow-y-auto pr-2">
-                <p class="text-slate-500 italic">Connecting to players...</p>
+        <div class="col-span-4 h-full flex flex-col">
+            <div class="glass rounded-[2rem] p-8 h-full flex flex-col border-white/5">
+                <h2 class="text-white uppercase tracking-widest font-extrabold mb-8 text-sm flex items-center gap-2">
+                    <span class="w-2 h-2 bg-purple-500 rounded-full"></span> Top Contenders
+                </h2>
+                
+                <div id="leaderboard" class="space-y-8 overflow-y-auto pr-4 flex-grow">
+                    <div class="animate-pulse space-y-4">
+                        <div class="h-8 bg-white/5 rounded-lg w-3/4"></div>
+                        <div class="h-8 bg-white/5 rounded-lg w-1/2"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -57,7 +101,6 @@
 
         async function sync() {
             try {
-                // cache-buster cb added to ensure fresh data from Google Script
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
                 
@@ -67,50 +110,44 @@
                 const ansText = document.getElementById('mon-ans-text');
                 const lbContainer = document.getElementById('leaderboard');
 
-                // 1. UPDATE QUESTION & ANSWER STATE
+                // 1. QUESTION & ANSWER LOGIC
                 if(data.status === "ACTIVE") {
                     qEl.innerText = data.question;
                     pEl.innerText = data.points + " POINTS";
                     pEl.classList.remove('hidden');
-                    qEl.classList.remove('text-slate-700');
-                    qEl.classList.add('text-white');
+                    qEl.classList.replace('text-white/20', 'text-white');
 
-                    // REVEAL LOGIC: Checks the 'reveal' property from your Spreadsheet
-                    // Handles both boolean true and string "true"
                     if(data.reveal === true || data.reveal === "true") {
                         ansText.innerText = data.answer;
                         ansContainer.classList.remove('hidden');
                         ansContainer.classList.add('flex');
                     } else {
-                        // Keep hidden if reveal is false
-                        ansContainer.classList.add('hidden');
-                        ansContainer.classList.remove('flex');
+                        ansContainer.classList.replace('flex', 'hidden');
                     }
                 } else {
-                    // RESET STATE (When Admin resets or no active question)
                     qEl.innerText = "Ready for the next Box...";
-                    qEl.classList.remove('text-white');
-                    qEl.classList.add('text-slate-700');
+                    qEl.classList.add('text-white/20');
                     pEl.classList.add('hidden');
-                    
-                    // Force hide answer container on reset
                     ansContainer.classList.add('hidden');
                     ansContainer.classList.remove('flex');
                 }
 
-                // 2. UPDATE LEADERBOARD
+                // 2. LEADERBOARD LOGIC
                 if (data.players && data.players.length > 0) {
                     const sortedPlayers = data.players.sort((a, b) => b.score - a.score);
-                    const maxScore = Math.max(...sortedPlayers.map(p => p.score), 100);
+                    const maxScore = Math.max(...sortedPlayers.map(p => p.score), 1);
 
-                    lbContainer.innerHTML = sortedPlayers.map(player => `
-                        <div class="space-y-2">
-                            <div class="flex justify-between font-bold text-2xl uppercase tracking-tighter">
-                                <span>${player.name}</span>
-                                <span class="text-blue-400 font-mono">${player.score}</span>
+                    lbContainer.innerHTML = sortedPlayers.map((player, idx) => `
+                        <div class="space-y-3 group">
+                            <div class="flex justify-between items-end">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-bold text-white/20">0${idx + 1}</span>
+                                    <span class="font-bold text-xl uppercase tracking-tighter text-white/90">${player.name}</span>
+                                </div>
+                                <span class="text-purple-400 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
                             </div>
-                            <div class="h-3 bg-slate-900 rounded-full border border-blue-900/50 overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-blue-700 to-blue-400 transition-all duration-1000" 
+                            <div class="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-purple-600 via-indigo-400 to-purple-400 transition-all duration-1000 shadow-[0_0_15px_rgba(168,85,247,0.4)]" 
                                      style="width: ${(player.score / maxScore) * 100}%"></div>
                             </div>
                         </div>
@@ -121,7 +158,6 @@
             }
         }
 
-        // Poll every 1.25 seconds
         setInterval(sync, 1250);
         sync();
     </script>
