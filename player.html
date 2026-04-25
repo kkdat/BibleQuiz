@@ -13,24 +13,24 @@
             <p class="text-slate-500 text-center mb-6">Enter authorized credentials</p>
             
             <input id="user" type="text" placeholder="Authorized Username" 
-                   class="w-full p-4 border-2 border-slate-100 mb-3 rounded-xl focus:border-yellow-500 outline-none transition-all">
+                   class="w-full p-4 border-2 border-slate-100 mb-3 rounded-xl focus:border-yellow-500 outline-none transition-all uppercase">
             
             <input id="pass" type="password" placeholder="Passcode" 
                    class="w-full p-4 border-2 border-slate-100 mb-6 rounded-xl focus:border-yellow-500 outline-none transition-all">
             
-            <button onclick="doRegister()" 
+            <button id="regBtn" onclick="doRegister()" 
                     class="w-full bg-yellow-500 text-white font-black py-4 rounded-xl shadow-lg hover:bg-yellow-600 transition-all active:scale-95">
                 ENTER ARENA
             </button>
             
-            <p id="error-msg" class="text-red-500 text-xs mt-4 text-center hidden font-bold">Please check your credentials.</p>
+            <p id="error-msg" class="text-red-500 text-sm mt-4 text-center hidden font-bold italic animate-pulse">Invalid Username or Passcode.</p>
         </div>
     </div>
 
     <div id="wait-screen" class="hidden text-center">
         <div class="w-16 h-16 border-8 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
         <p class="text-2xl font-bold text-yellow-500 tracking-wide uppercase">Waiting for Admin...</p>
-        <p class="text-slate-500 mt-2">The quiz will begin shortly.</p>
+        <p id="player-tag" class="text-slate-400 mt-2 font-mono text-sm uppercase tracking-widest"></p>
     </div>
 
     <div id="q-screen" class="hidden w-full max-w-xl">
@@ -43,43 +43,71 @@
     </div>
 
     <script>
+        // --- EDIT YOUR AUTHORIZED LIST HERE ---
+        // Format is "Username": "Passcode"
+        const AUTHORIZED_LIST = {
+            "TEAM_ALPHA": "1234",
+            "TEAM_BETA": "5678",
+            "PLAYER_1": "0000",
+            "GUEST": "WELCOME"
+        };
+
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4Wu0MhQ91JXJKLca-Ml_CIcSVK8SVWnZbsvGbJbRff8GJCqS03bb8Xp0vRrMBVYFv/exec"; 
         let lastQ = "";
         let countdown;
 
         async function doRegister() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
+            const user = document.getElementById('user').value.trim().toUpperCase();
+            const pass = document.getElementById('pass').value.trim();
+            const btn = document.getElementById('regBtn');
+            const err = document.getElementById('error-msg');
             
             if(!user || !pass) {
                 alert("Please fill in both fields.");
                 return;
             }
-            
-            // Sending to Google Script. 
-            // The Script will check the AUTHORIZED_USERS list. 
-            // If they don't match, they won't appear on the Sheet.
-            await fetch(SCRIPT_URL, { 
-                method: "POST", 
-                mode: "no-cors", 
-                body: JSON.stringify({ action: "register", user: user, pass: pass })
-            });
 
-            // Transition UI
+            // 1. LOCAL AUTHENTICATION CHECK
+            if (AUTHORIZED_LIST[user] && AUTHORIZED_LIST[user] === pass) {
+                // Success!
+                btn.innerText = "CONNECTING...";
+                btn.disabled = true;
+                
+                // 2. SEND TO GOOGLE SHEET (for Monitor display)
+                try {
+                    await fetch(SCRIPT_URL, { 
+                        method: "POST", 
+                        mode: "no-cors", 
+                        body: JSON.stringify({ action: "register", user: user, pass: pass })
+                    });
+
+                    // Update UI to enter game
+                    document.getElementById('player-tag').innerText = "Logged in as: " + user;
+                    enterArena();
+                } catch (e) {
+                    alert("Network Error. Please try again.");
+                    btn.disabled = false;
+                    btn.innerText = "ENTER ARENA";
+                }
+            } else {
+                // Fail!
+                err.classList.remove('hidden');
+            }
+        }
+
+        function enterArena() {
             document.getElementById('reg-screen').classList.add('opacity-0');
             setTimeout(() => {
                 document.getElementById('reg-screen').classList.add('hidden');
                 document.getElementById('wait-screen').classList.remove('hidden');
             }, 300);
 
-            // Start looking for questions immediately
             poll();
-            setInterval(poll, 2000);
+            setInterval(poll, 2500);
         }
 
         async function poll() {
             try {
-                // Use Cache Buster (?cb=) to ensure we don't get old data
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
 
@@ -94,7 +122,7 @@
                     document.getElementById('wait-screen').classList.remove('hidden');
                     clearInterval(countdown);
                 }
-            } catch(e) { console.log("Searching for live question..."); }
+            } catch(e) {}
         }
 
         function startQuestion(data) {
@@ -110,10 +138,7 @@
             countdown = setInterval(() => {
                 time--;
                 document.getElementById('timer').innerText = time + "s";
-                if(time <= 0) { 
-                    clearInterval(countdown); 
-                    submit(); 
-                }
+                if(time <= 0) { clearInterval(countdown); submit(); }
             }, 1000);
 
             const opts = data.choices.split(",");
@@ -126,7 +151,6 @@
             clearInterval(countdown);
             document.getElementById('q-screen').classList.add('hidden');
             document.getElementById('wait-screen').classList.remove('hidden');
-            // Here you could add logic to send the answer to Google Sheets
         }
     </script>
 </body>
