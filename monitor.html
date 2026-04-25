@@ -9,14 +9,12 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            /* Original dark gradient */
             background: radial-gradient(circle at top right, #2e1065, #0f172a);
             min-height: 100vh;
-            color: #f8fafc; /* Keep default body text light to be visible on dark bg */
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -28,18 +26,16 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .reveal-anim { 
+            animation: reveal-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+
         @keyframes reveal-pop {
             0% { transform: scale(0.85) translateY(20px); opacity: 0; }
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
 
-        .reveal-anim { 
-            animation: reveal-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-        }
-
-        /* Custom scrollbar for leaderboard */
         #leaderboard::-webkit-scrollbar { width: 4px; }
-        #leaderboard::-webkit-scrollbar-track { background: transparent; }
         #leaderboard::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); border-radius: 10px; }
     </style>
 </head>
@@ -47,35 +43,37 @@
     
     <div class="flex justify-between items-end mb-16 border-b border-white/10 pb-10">
         <div>
-            <h1 class="text-gradient-purple uppercase tracking-[0.4em] font-extrabold text-3xl">Balikatan Bible Quiz</h1>
+            <h1 class="uppercase tracking-[0.4em] font-extrabold text-3xl">
+                <span class="text-purple-400">Balikatan</span> 
+                <span class="text-indigo-400">Bible Quiz</span>
+            </h1>
             <div class="flex items-center gap-3 mt-2">
                 <span class="relative flex h-3 w-3">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
                 </span>
-                <p id="status-tag" class="text-slate-900 font-bold text-xs uppercase tracking-[0.2em]">Live Signal: Encrypted</p>
+                <p id="status-tag" class="text-slate-300 font-bold text-xs uppercase tracking-[0.2em]">Live Signal: Encrypted</p>
             </div>
         </div>
         <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
-            <span class="text-slate-900 text-xs font-bold uppercase tracking-widest">Global Status</span>
+            <span class="text-slate-300 text-xs font-bold uppercase tracking-widest">Global Status</span>
             <span class="text-emerald-400 font-black text-sm uppercase">Active</span>
         </div>
     </div>
 
     <div class="grid grid-cols-12 gap-16 h-[65vh] items-start">
-        
         <div class="col-span-8 flex flex-col justify-center h-full relative pr-4">
-            <div id="mon-pts" class="mb-6 text-xl text-slate-950 font-bold hidden uppercase tracking-[0.3em] bg-purple-500/10 w-fit px-5 py-1.5 rounded-full border border-purple-500/20">
+            <div id="mon-pts" class="mb-6 text-xl text-slate-900 font-black hidden uppercase tracking-[0.3em] bg-purple-300 w-fit px-5 py-1.5 rounded-full border border-purple-400 shadow-lg">
                 0 POINTS
             </div>
             
-            <div id="mon-q" class="text-6xl md:text-7xl font-extrabold leading-[1.15] text-white transition-all duration-700 ease-out">
+            <div id="mon-q" class="text-6xl md:text-7xl font-extrabold leading-[1.15] text-white transition-all duration-700 ease-out drop-shadow-md">
                 Ready for the next Question...
             </div>
             
-            <div id="mon-ans-container" class="absolute inset-0 glass bg-purple-950/40 hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border-purple-500/40 reveal-anim z-20 shadow-[0_0_100px_rgba(168,85,247,0.15)]">
+            <div id="mon-ans-container" class="absolute inset-0 glass bg-purple-950/90 hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border-purple-500/40 reveal-anim z-20 shadow-2xl">
                 <span class="text-emerald-400 font-bold tracking-[0.4em] uppercase text-sm mb-6 bg-emerald-500/10 px-4 py-1 rounded-full border border-emerald-500/20">Correct Revelation</span>
-                <div id="mon-ans-text" class="text-7xl md:text-9xl font-black text-white drop-shadow-[0_0_50px_rgba(255,255,255,0.3)] uppercase tracking-tight">
+                <div id="mon-ans-text" class="text-7xl md:text-9xl font-black text-white uppercase tracking-tight drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]">
                     ---
                 </div>
             </div>
@@ -88,11 +86,7 @@
                 </h2>
                 
                 <div id="leaderboard" class="space-y-8 overflow-y-auto pr-4 flex-grow">
-                    <div class="animate-pulse space-y-4">
-                        <div class="h-8 bg-white/5 rounded-lg w-3/4"></div>
-                        <div class="h-8 bg-white/5 rounded-lg w-1/2"></div>
                     </div>
-                </div>
             </div>
         </div>
     </div>
@@ -129,7 +123,6 @@
                     qEl.classList.add('text-white/20');
                     pEl.classList.add('hidden');
                     ansContainer.classList.add('hidden');
-                    ansContainer.classList.remove('flex');
                 }
 
                 if (data.players && data.players.length > 0) {
@@ -140,13 +133,13 @@
                         <div class="space-y-3 group">
                             <div class="flex justify-between items-end">
                                 <div class="flex items-center gap-3">
-                                    <span class="text-xs font-bold text-slate-900">0${idx + 1}</span>
-                                    <span class="font-bold text-xl uppercase tracking-tighter text-slate-900">${player.name}</span>
+                                    <span class="text-xs font-bold text-slate-400">0${idx + 1}</span>
+                                    <span class="font-bold text-xl uppercase tracking-tighter text-white">${player.name}</span>
                                 </div>
-                                <span class="text-purple-400 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
+                                <span class="text-purple-300 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
                             </div>
                             <div class="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                <div class="h-full bg-gradient-to-r from-purple-600 via-indigo-400 to-purple-400 transition-all duration-1000 shadow-[0_0_15px_rgba(168,85,247,0.4)]" 
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-400 transition-all duration-1000 shadow-[0_0_15px_rgba(168,85,247,0.3)]" 
                                      style="width: ${(player.score / maxScore) * 100}%"></div>
                             </div>
                         </div>
