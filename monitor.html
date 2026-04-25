@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bar { transition: width 1s ease-in-out; }
+    </style>
+</head>
+<body class="bg-black text-white p-12">
+    <div class="grid grid-cols-2 gap-12">
+        <div>
+            <h1 class="text-4xl font-bold text-yellow-500 mb-8">Live Question</h1>
+            <div id="display-box" class="bg-slate-900 p-10 rounded-3xl border-4 border-yellow-600">
+                <p id="monitor-q" class="text-3xl font-medium italic">Ready for the next round...</p>
+            </div>
+        </div>
+        <div>
+            <h1 class="text-4xl font-bold text-blue-500 mb-8">Leaderboard</h1>
+            <div id="leaderboard" class="space-y-6">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+        async function updateMonitor() {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            if(data.status === "ACTIVE") {
+                document.getElementById('monitor-q').innerText = data.question;
+            }
+            // Add leaderboard fetching logic here to update bars
+        }
+
+        setInterval(updateMonitor, 3000);
+    </script>
+</body>
+</html>
