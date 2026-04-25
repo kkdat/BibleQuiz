@@ -16,21 +16,25 @@
     </div>
 
     <div id="modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center">
-            <div id="m-pts" class="text-5xl font-black text-yellow-600 mb-2">0</div>
-            <p id="m-que" class="text-xl font-bold mb-6 italic leading-tight"></p>
-            <p class="text-xs text-slate-400 uppercase tracking-widest mb-4">Correct Answer: <span id="m-ans" class="text-green-600 font-bold"></span></p>
+        <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl border-4 border-yellow-500">
+            <div id="m-timer" class="text-6xl font-black text-red-600 mb-4 tabular-nums">0s</div>
             
-            <button id="pushBtn" onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 transition-all">DISPLAY TO MONITOR</button>
-            <button onclick="closeModal()" class="mt-4 text-slate-500 hover:text-slate-800 underline block w-full">Cancel</button>
+            <div id="m-pts" class="text-4xl font-black text-yellow-600 mb-2 underline">0</div>
+            <p id="m-que" class="text-xl font-bold mb-6 italic leading-tight"></p>
+            <p class="text-xs text-slate-400 uppercase tracking-widest mb-6">Correct Answer: <span id="m-ans" class="text-green-600 font-bold"></span></p>
+            
+            <button id="pushBtn" onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 transition-all active:scale-95">DISPLAY TO MONITOR</button>
+            
+            <button onclick="closeModal()" class="mt-6 text-slate-400 hover:text-red-600 font-bold uppercase tracking-widest text-xs block w-full border-t pt-4">Close Control</button>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKFDl8uUOuD_ouEH_m2WgLsCC0diyD2h6KSYcPA7zTJtZb8WPnWU1C_63SFV-5REtL/exec"; 
         let activeQ = null;
+        let countdownInterval = null;
+        let timeLeft = 0;
 
-        // Added 'ans' field to each question to track the correct answer
         const questions = [
             { id: 1, p: 50, q: "Who was swallowed by a great fish?", c: "Jonah,Noah,Peter,Paul", ans: "Jonah", t: 15 },
             { id: 2, p: 50, q: "How many days did it rain during the Great Flood?", c: "7,12,40,100", ans: "40", t: 15 },
@@ -61,10 +65,17 @@
             btn.innerHTML = `<span class="text-3xl">💼</span><br>Box ${item.id}`;
             btn.onclick = () => {
                 activeQ = item;
+                timeLeft = item.t;
+                // Reset UI
+                document.getElementById('m-timer').innerText = timeLeft + "s";
+                document.getElementById('m-timer').classList.remove('animate-pulse');
                 document.getElementById('m-pts').innerText = item.p;
                 document.getElementById('m-que').innerText = item.q;
                 document.getElementById('m-ans').innerText = item.ans;
                 document.getElementById('modal').classList.remove('hidden');
+                
+                // Clear any previous interval just in case
+                clearInterval(countdownInterval);
             };
             grid.appendChild(btn);
         });
@@ -82,15 +93,29 @@
                     p: activeQ.p, 
                     c: activeQ.c, 
                     t: activeQ.t,
-                    ans: activeQ.ans // Sending correct answer to the sheet
+                    ans: activeQ.ans 
                 })
             });
             
-            setTimeout(() => { 
-                btn.innerText = "DISPLAY TO MONITOR"; 
-                btn.disabled = false; 
-                closeModal(); 
-            }, 500);
+            btn.innerText = "DISPLAYED ✅";
+            btn.classList.replace('bg-green-600', 'bg-blue-600');
+
+            // START TIMER ONLY AFTER PUSH
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    document.getElementById('m-timer').innerText = timeLeft + "s";
+                    if (timeLeft <= 5) document.getElementById('m-timer').classList.add('animate-pulse');
+                } else {
+                    clearInterval(countdownInterval);
+                    document.getElementById('m-timer').innerText = "TIME UP!";
+                }
+            }, 1000);
         }
 
         async function resetSystem() {
@@ -99,7 +124,15 @@
             alert("System Reset");
         }
 
-        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        function closeModal() { 
+            document.getElementById('modal').classList.add('hidden'); 
+            clearInterval(countdownInterval);
+            // Reset button color for next box
+            const btn = document.getElementById('pushBtn');
+            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            btn.innerText = "DISPLAY TO MONITOR";
+            btn.disabled = false;
+        }
     </script>
 </body>
 </html>
