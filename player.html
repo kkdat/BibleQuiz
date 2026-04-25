@@ -1,39 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
+    <title>Player - Bible Quiz</title>
 </head>
-<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
-    
-    <div id="reg" class="bg-white p-8 rounded-xl text-black w-80">
-        <h2 class="text-xl font-bold mb-4">Register</h2>
-        <input id="user" type="text" placeholder="Username" class="w-full border p-2 mb-2">
-        <input id="pass" type="password" placeholder="Passcode" class="w-full border p-2 mb-4">
-        <button onclick="register()" class="w-full bg-blue-600 text-white py-2 rounded">Join Quiz</button>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div id="reg-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 p-8 rounded-2xl w-full max-w-sm">
+            <h2 class="text-2xl font-bold mb-4">Registry</h2>
+            <input id="user" type="text" placeholder="Username" class="w-full p-3 border mb-3 rounded-lg">
+            <input id="pass" type="password" placeholder="Passcode" class="w-full p-3 border mb-6 rounded-lg">
+            <button onclick="doRegister()" class="w-full bg-yellow-500 text-white font-bold py-3 rounded-lg">JOIN GAME</button>
+        </div>
     </div>
 
-    <div id="wait" class="hidden text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-yellow-500 mx-auto mb-4"></div>
-        <p class="text-xl">Waiting for next question...</p>
+    <div id="wait-screen" class="hidden text-center">
+        <div class="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-xl font-medium text-yellow-500">Waiting for Admin...</p>
     </div>
 
-    <div id="game" class="hidden w-full max-w-md p-6">
-        <div id="timer" class="text-4xl font-bold text-red-500 mb-4">0s</div>
-        <h2 id="q-text" class="text-2xl mb-6"></h2>
-        <div id="choices" class="grid gap-3"></div>
+    <div id="q-screen" class="hidden w-full max-w-lg">
+        <div id="timer" class="text-5xl font-black text-center mb-6 text-red-500">0s</div>
+        <div id="q-text" class="text-2xl font-bold text-center mb-8 bg-slate-800 p-6 rounded-xl border border-slate-700"></div>
+        <div id="options" class="grid gap-3"></div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoOT-6CEchAumFG4HpwgL045HMj022-h_k1W15V-WbTx8Czvlo2YiMWqlBJB3QAE8F/exec";
         let lastQ = "";
+        let countdown;
 
-        async function register() {
+        async function doRegister() {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
-            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({action: "register", user, pass}) });
-            document.getElementById('reg').classList.add('hidden');
-            document.getElementById('wait').classList.remove('hidden');
-            setInterval(poll, 3000);
+            if(!user || !pass) return;
+            
+            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "register", user, pass })});
+            document.getElementById('reg-screen').classList.add('hidden');
+            document.getElementById('wait-screen').classList.remove('hidden');
+            setInterval(poll, 2500);
         }
 
         async function poll() {
@@ -41,34 +48,39 @@
             const data = await res.json();
             if (data.status === "ACTIVE" && data.question !== lastQ) {
                 lastQ = data.question;
-                showQuestion(data);
+                startQuestion(data);
             }
         }
 
-        function showQuestion(data) {
-            document.getElementById('wait').classList.add('hidden');
-            document.getElementById('game').classList.remove('hidden');
+        function startQuestion(data) {
+            document.getElementById('wait-screen').classList.add('hidden');
+            document.getElementById('q-screen').classList.remove('hidden');
             document.getElementById('q-text').innerText = data.question;
+            
             let time = data.timer;
-            const tDiv = document.getElementById('timer');
-            const interval = setInterval(() => {
+            document.getElementById('timer').innerText = time + "s";
+            
+            clearInterval(countdown);
+            countdown = setInterval(() => {
                 time--;
-                tDiv.innerText = time + "s";
+                document.getElementById('timer').innerText = time + "s";
                 if(time <= 0) {
-                    clearInterval(interval);
-                    resetToWait();
+                    clearInterval(countdown);
+                    document.getElementById('q-screen').classList.add('hidden');
+                    document.getElementById('wait-screen').classList.remove('hidden');
                 }
             }, 1000);
 
-            const options = data.choices.split(",");
-            document.getElementById('choices').innerHTML = options.map(opt => 
-                `<button onclick="resetToWait()" class="bg-slate-700 p-4 rounded hover:bg-yellow-600">${opt}</button>`
+            const opts = data.choices.split(",");
+            document.getElementById('options').innerHTML = opts.map(o => 
+                `<button onclick="submit()" class="bg-slate-700 p-4 rounded-xl font-bold hover:bg-yellow-600 transition">${o}</button>`
             ).join('');
         }
 
-        function resetToWait() {
-            document.getElementById('game').classList.add('hidden');
-            document.getElementById('wait').classList.remove('hidden');
+        function submit() {
+            clearInterval(countdown);
+            document.getElementById('q-screen').classList.add('hidden');
+            document.getElementById('wait-screen').classList.remove('hidden');
         }
     </script>
 </body>
