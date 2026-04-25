@@ -1,53 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
+    <title>Admin - Bible Quiz</title>
 </head>
-<body class="bg-gray-900 text-white p-10">
-    <h1 class="text-3xl font-bold mb-8 text-yellow-500">Quiz Control Center</h1>
-    <div id="grid" class="grid grid-cols-5 gap-4"></div>
+<body class="bg-slate-900 text-white p-8">
+    <h1 class="text-3xl font-bold text-yellow-500 mb-6">Briefcase Control Panel</h1>
+    
+    <div id="grid" class="grid grid-cols-5 gap-4 max-w-5xl mx-auto"></div>
 
-    <div id="modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center">
-        <div class="bg-white text-black p-8 rounded-xl max-w-lg w-full text-center">
-            <h2 id="m-pts" class="text-4xl font-black mb-4"></h2>
-            <p id="m-que" class="text-xl mb-6"></p>
-            <button onclick="pushToLive()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold">DISPLAY TO MONITOR</button>
-            <button onclick="closeModal()" class="block mx-auto mt-4 text-gray-500">Cancel</button>
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center">
+            <div id="m-pts" class="text-5xl font-black text-yellow-600 mb-2">0</div>
+            <div class="text-sm uppercase tracking-widest mb-4 text-slate-400">Points Available</div>
+            <p id="m-que" class="text-xl font-bold mb-6 italic"></p>
+            <button onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700">DISPLAY TO MONITOR</button>
+            <button onclick="closeModal()" class="mt-4 text-slate-500 underline">Cancel</button>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoOT-6CEchAumFG4HpwgL045HMj022-h_k1W15V-WbTx8Czvlo2YiMWqlBJB3QAE8F/exec";
-        let currentQ = {};
+        let activeQ = null;
 
-        const questions = Array.from({length: 20}, (_, i) => ({
-            id: i+1, pts: (i+1)*50, q: `Question about Bible topic ${i+1}?`, c: "A,B,C,D", t: 20
-        }));
+        const questions = [
+            { id: 1, p: 50, q: "Who was swallowed by a great fish?", c: "Jonah,Noah,Peter,Paul", t: 15 },
+            { id: 2, p: 50, q: "How many days did it rain during the Great Flood?", c: "7,12,40,100", t: 15 },
+            { id: 3, p: 75, q: "What was the first book of the Bible?", c: "Exodus,Genesis,Psalms,Matthew", t: 15 },
+            { id: 4, p: 75, q: "Who received the Ten Commandments?", c: "Abraham,Isaac,Moses,Joshua", t: 20 },
+            { id: 5, p: 100, q: "What did David use to defeat Goliath?", c: "Sword,Spear,Slingshot,Bow", t: 15 },
+            { id: 6, p: 100, q: "How many disciples did Jesus have?", c: "10,12,13,7", t: 15 },
+            { id: 7, p: 150, q: "Who was the oldest man in the Bible?", c: "Adam,Enoch,Methuselah,Noah", t: 20 },
+            { id: 8, p: 150, q: "What was the secret to Samson's strength?", c: "His belt,His hair,His shoes,His diet", t: 15 },
+            { id: 9, p: 200, q: "Which city's walls fell after Israel marched around it?", c: "Babylon,Jericho,Nineveh,Rome", t: 20 },
+            { id: 10, p: 200, q: "What did God use to lead the Israelites by night?", c: "A star,A map,A cloud,A pillar of fire", t: 15 },
+            { id: 11, p: 250, q: "Who was known as the 'Dreamer'?", c: "Joseph,Benjamin,Reuben,Levi", t: 20 },
+            { id: 12, p: 250, q: "What is the shortest verse in the Bible?", c: "God is love,Jesus wept,Pray always,Follow me", t: 15 },
+            { id: 13, p: 250, q: "Which apostle was a tax collector?", c: "Peter,Andrew,Matthew,Thomas", t: 20 },
+            { id: 14, p: 300, q: "What was the first miracle performed by Jesus?", c: "Healing,Water to wine,Walking on water,Raising Lazarus", t: 25 },
+            { id: 15, p: 300, q: "How many plagues did God send upon Egypt?", c: "7,10,12,3", t: 20 },
+            { id: 16, p: 400, q: "Who wrote the most books in the New Testament?", c: "Peter,John,Paul,Luke", t: 25 },
+            { id: 17, p: 400, q: "On what island was John when he wrote Revelation?", c: "Cyprus,Patmos,Malta,Crete", t: 25 },
+            { id: 18, p: 500, q: "Who was the first King of Israel?", c: "Saul,David,Solomon,Ahab", t: 25 },
+            { id: 19, p: 500, q: "What was the name of the mountain where Moses died?", c: "Sinai,Ararat,Nebo,Carmel", t: 25 },
+            { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", c: "Judah,Levi,Benjamin,Dan", t: 25 }
+        ];
 
         const grid = document.getElementById('grid');
-        questions.forEach(q => {
-            const box = document.createElement('div');
-            box.className = "h-24 bg-slate-800 border-2 border-yellow-700 flex items-center justify-center cursor-pointer hover:bg-yellow-700 transition rounded";
-            box.innerHTML = `💼 ${q.id}`;
-            box.onclick = () => showBox(q);
-            grid.appendChild(box);
+        questions.forEach(item => {
+            const btn = document.createElement('div');
+            btn.className = "bg-slate-800 border-2 border-yellow-700/50 p-6 rounded-xl cursor-pointer hover:scale-105 transition text-center font-bold text-yellow-500";
+            btn.innerHTML = `💼<br>Box ${item.id}`;
+            btn.onclick = () => {
+                activeQ = item;
+                document.getElementById('m-pts').innerText = item.p;
+                document.getElementById('m-que').innerText = item.q;
+                document.getElementById('modal').classList.remove('hidden');
+            };
+            grid.appendChild(btn);
         });
-
-        function showBox(q) {
-            currentQ = q;
-            document.getElementById('m-pts').innerText = q.pts + " PTS";
-            document.getElementById('m-que').innerText = q.q;
-            document.getElementById('modal').classList.remove('hidden');
-        }
 
         async function pushToLive() {
             await fetch(SCRIPT_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "pushQuestion", q: currentQ.q, p: currentQ.pts, c: currentQ.c, t: currentQ.t })
+                body: JSON.stringify({ action: "pushQuestion", q: activeQ.q, p: activeQ.p, c: activeQ.c, t: activeQ.t })
             });
             alert("Question Live!");
-            document.getElementById('modal').classList.add('hidden');
+            closeModal();
         }
+
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
     </script>
 </body>
