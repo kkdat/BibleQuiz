@@ -5,52 +5,81 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Player - Bible Quiz</title>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-6 font-sans">
 
     <div id="reg-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white text-slate-900 p-8 rounded-3xl w-full max-w-sm shadow-2xl">
-            <h2 class="text-2xl font-black mb-6 text-center">Player Registry</h2>
-            <input id="user" type="text" placeholder="Username" class="w-full p-4 border-2 mb-3 rounded-xl outline-none focus:border-yellow-500">
-            <input id="pass" type="password" placeholder="Passcode" class="w-full p-4 border-2 mb-6 rounded-xl outline-none focus:border-yellow-500">
-            <button onclick="doRegister()" class="w-full bg-yellow-500 text-white font-black py-4 rounded-xl shadow-lg">ENTER ARENA</button>
+            <h2 class="text-3xl font-black mb-2 text-center text-slate-800">Welcome</h2>
+            <p class="text-slate-500 text-center mb-6">Enter authorized credentials</p>
+            
+            <input id="user" type="text" placeholder="Authorized Username" 
+                   class="w-full p-4 border-2 border-slate-100 mb-3 rounded-xl focus:border-yellow-500 outline-none transition-all">
+            
+            <input id="pass" type="password" placeholder="Passcode" 
+                   class="w-full p-4 border-2 border-slate-100 mb-6 rounded-xl focus:border-yellow-500 outline-none transition-all">
+            
+            <button onclick="doRegister()" 
+                    class="w-full bg-yellow-500 text-white font-black py-4 rounded-xl shadow-lg hover:bg-yellow-600 transition-all active:scale-95">
+                ENTER ARENA
+            </button>
+            
+            <p id="error-msg" class="text-red-500 text-xs mt-4 text-center hidden font-bold">Please check your credentials.</p>
         </div>
     </div>
 
     <div id="wait-screen" class="hidden text-center">
         <div class="w-16 h-16 border-8 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-        <p class="text-2xl font-bold text-yellow-500">Waiting for Admin...</p>
+        <p class="text-2xl font-bold text-yellow-500 tracking-wide uppercase">Waiting for Admin...</p>
+        <p class="text-slate-500 mt-2">The quiz will begin shortly.</p>
     </div>
 
     <div id="q-screen" class="hidden w-full max-w-xl">
         <div class="flex justify-between items-center mb-8">
-             <div id="timer" class="text-6xl font-black text-red-500">0s</div>
+             <div id="timer" class="text-6xl font-black text-red-500 drop-shadow-md">0s</div>
              <div id="p-label" class="bg-yellow-500/20 text-yellow-500 px-6 py-2 rounded-full font-black border border-yellow-500">0 PTS</div>
         </div>
-        <div id="q-text" class="text-3xl font-bold text-center mb-10 bg-slate-800 p-8 rounded-3xl border-2 border-slate-700"></div>
+        <div id="q-text" class="text-3xl font-bold text-center mb-10 bg-slate-800 p-8 rounded-3xl border-2 border-slate-700 shadow-xl leading-snug"></div>
         <div id="options" class="grid grid-cols-1 gap-4"></div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxozOjSYAFFeLAdDkN7eriwoJ1EW1ylILNKGDDq1xplomnwWNmwTRm419d5sd6djoKB/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4Wu0MhQ91JXJKLca-Ml_CIcSVK8SVWnZbsvGbJbRff8GJCqS03bb8Xp0vRrMBVYFv/exec"; 
         let lastQ = "";
         let countdown;
 
         async function doRegister() {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
-            if(!user || !pass) return;
             
-            await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "register", user, pass })});
+            if(!user || !pass) {
+                alert("Please fill in both fields.");
+                return;
+            }
+            
+            // Sending to Google Script. 
+            // The Script will check the AUTHORIZED_USERS list. 
+            // If they don't match, they won't appear on the Sheet.
+            await fetch(SCRIPT_URL, { 
+                method: "POST", 
+                mode: "no-cors", 
+                body: JSON.stringify({ action: "register", user: user, pass: pass })
+            });
+
+            // Transition UI
             document.getElementById('reg-screen').classList.add('opacity-0');
             setTimeout(() => {
                 document.getElementById('reg-screen').classList.add('hidden');
                 document.getElementById('wait-screen').classList.remove('hidden');
             }, 300);
+
+            // Start looking for questions immediately
+            poll();
             setInterval(poll, 2000);
         }
 
         async function poll() {
             try {
+                // Use Cache Buster (?cb=) to ensure we don't get old data
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
 
@@ -65,7 +94,7 @@
                     document.getElementById('wait-screen').classList.remove('hidden');
                     clearInterval(countdown);
                 }
-            } catch(e) { console.log("Polling..."); }
+            } catch(e) { console.log("Searching for live question..."); }
         }
 
         function startQuestion(data) {
@@ -81,12 +110,15 @@
             countdown = setInterval(() => {
                 time--;
                 document.getElementById('timer').innerText = time + "s";
-                if(time <= 0) { clearInterval(countdown); submit(); }
+                if(time <= 0) { 
+                    clearInterval(countdown); 
+                    submit(); 
+                }
             }, 1000);
 
             const opts = data.choices.split(",");
             document.getElementById('options').innerHTML = opts.map(o => 
-                `<button onclick="submit()" class="bg-slate-800 border-2 border-slate-700 p-5 rounded-2xl font-bold text-xl hover:border-yellow-500 hover:bg-slate-700 text-left">${o}</button>`
+                `<button onclick="submit()" class="bg-slate-800 border-2 border-slate-700 p-5 rounded-2xl font-bold text-xl hover:border-yellow-500 hover:bg-slate-700 transition-all text-left shadow-lg active:bg-yellow-600">${o}</button>`
             ).join('');
         }
 
@@ -94,6 +126,7 @@
             clearInterval(countdown);
             document.getElementById('q-screen').classList.add('hidden');
             document.getElementById('wait-screen').classList.remove('hidden');
+            // Here you could add logic to send the answer to Google Sheets
         }
     </script>
 </body>
