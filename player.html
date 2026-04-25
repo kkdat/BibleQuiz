@@ -3,54 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Monitor - Bible Quiz</title>
+    <title>Player - Bible Quiz</title>
 </head>
-<body class="bg-black text-white p-12 overflow-hidden font-sans">
-    <div class="grid grid-cols-12 gap-12 h-[80vh] items-center">
-        <div class="col-span-8 flex flex-col justify-center pr-10 border-r-4 border-slate-900">
-            <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black mb-6 text-2xl">Current Question</h1>
-            <div id="mon-q" class="text-7xl font-black leading-tight text-white drop-shadow-2xl">
-                Ready for Round 1...
-            </div>
-            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500/50 font-bold hidden">0 POINTS</div>
-        </div>
-        
-        <div class="col-span-4 flex flex-col h-full">
-            <h1 class="text-blue-500 uppercase tracking-widest font-black mb-10 text-xl border-b-2 border-blue-900 pb-4">Rankings</h1>
-            <div id="leaderboard" class="space-y-10">
-                <div class="space-y-3">
-                    <div class="flex justify-between font-bold text-2xl"><span>Top Player</span><span>1,250</span></div>
-                    <div class="h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]" style="width: 85%"></div>
-                </div>
-            </div>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-6 font-sans">
+
+    <div id="reg-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 p-8 rounded-3xl w-full max-w-sm shadow-2xl">
+            <h2 class="text-3xl font-black mb-2 text-center text-slate-800">Ready?</h2>
+            <p class="text-slate-500 text-center mb-6">Enter your details to join</p>
+            <input id="user" type="text" placeholder="Username" class="w-full p-4 border-2 border-slate-100 mb-3 rounded-xl focus:border-yellow-500 outline-none transition-all">
+            <input id="pass" type="password" placeholder="Passcode" class="w-full p-4 border-2 border-slate-100 mb-6 rounded-xl focus:border-yellow-500 outline-none transition-all">
+            <button onclick="doRegister()" class="w-full bg-yellow-500 text-white font-black py-4 rounded-xl shadow-lg hover:bg-yellow-600 transition-all">ENTER ARENA</button>
         </div>
     </div>
 
+    <div id="wait-screen" class="hidden text-center">
+        <div class="w-16 h-16 border-8 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+        <p class="text-2xl font-bold text-yellow-500 tracking-wide uppercase">Waiting for the next Box...</p>
+        <p class="text-slate-500 mt-2">Get ready to tap fast!</p>
+    </div>
+
+    <div id="q-screen" class="hidden w-full max-w-xl">
+        <div class="flex justify-between items-center mb-8">
+             <div id="timer" class="text-6xl font-black text-red-500 drop-shadow-md">0s</div>
+             <div id="p-label" class="bg-yellow-500/10 text-yellow-500 px-6 py-2 rounded-full font-black border border-yellow-500/50">0 PTS</div>
+        </div>
+        <div id="q-text" class="text-3xl font-bold text-center mb-10 bg-slate-800 p-8 rounded-3xl border-2 border-slate-700 shadow-xl leading-snug"></div>
+        <div id="options" class="grid grid-cols-1 gap-4"></div>
+    </div>
+
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRst4vC09rgL3kH7HGqpxMPfha8t-mMsObfOTL3O4SH5PyBrQKunrjtdj-r7gQt7fs/exec";
+        const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+        let lastQ = "";
+        let countdown;
 
-        async function sync() {
-            try {
-                const res = await fetch(`${SCRIPT_URL}?v=${Math.random()}`);
-                const data = await res.json();
-                const qEl = document.getElementById('mon-q');
-                const pEl = document.getElementById('mon-pts');
-
-                if(data.status === "ACTIVE") {
-                    qEl.innerText = data.question;
-                    pEl.innerText = data.points + " POINTS";
-                    pEl.classList.remove('hidden');
-                    qEl.classList.add('text-white');
-                } else {
-                    qEl.innerText = "OPEN A BRIEFCASE...";
-                    qEl.classList.remove('text-white');
-                    qEl.classList.add('text-slate-700');
-                    pEl.classList.add('hidden');
-                }
-            } catch(e) {}
+        async function doRegister() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            if(!user || !pass) return;
+            
+            await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "register", user, pass })});
+            document.getElementById('reg-screen').classList.add('opacity-0');
+            setTimeout(() => {
+                document.getElementById('reg-screen').classList.add('hidden');
+                document.getElementById('wait-screen').classList.remove('hidden');
+            }, 300);
+            setInterval(poll, 2000);
         }
 
-        setInterval(sync, 2500);
+        async function poll() {
+            try {
+                // Cache Buster added here (?v=...)
+                const res = await fetch(`${SCRIPT_URL}?v=${Math.random()}`);
+                const data = await res.json();
+                if (data.status === "ACTIVE" && data.question !== lastQ) {
+                    lastQ = data.question;
+                    startQuestion(data);
+                }
+            } catch(e) { console.log("Polling..."); }
+        }
+
+        function startQuestion(data) {
+            document.getElementById('wait-screen').classList.add('hidden');
+            document.getElementById('q-screen').classList.remove('hidden');
+            document.getElementById('q-text').innerText = data.question;
+            document.getElementById('p-label').innerText = data.points + " PTS";
+            
+            let time = data.timer;
+            document.getElementById('timer').innerText = time + "s";
+            
+            clearInterval(countdown);
+            countdown = setInterval(() => {
+                time--;
+                document.getElementById('timer').innerText = time + "s";
+                if(time <= 5) document.getElementById('timer').classList.add('animate-pulse');
+                if(time <= 0) {
+                    clearInterval(countdown);
+                    submit();
+                }
+            }, 1000);
+
+            const opts = data.choices.split(",");
+            document.getElementById('options').innerHTML = opts.map(o => 
+                `<button onclick="submit()" class="bg-slate-800 border-2 border-slate-700 p-5 rounded-2xl font-bold text-xl hover:border-yellow-500 hover:bg-slate-700 transition-all text-left shadow-md">${o}</button>`
+            ).join('');
+        }
+
+        function submit() {
+            clearInterval(countdown);
+            document.getElementById('timer').classList.remove('animate-pulse');
+            document.getElementById('q-screen').classList.add('hidden');
+            document.getElementById('wait-screen').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
