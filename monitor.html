@@ -6,42 +6,63 @@
     <title>Monitor - Bible Quiz</title>
 </head>
 <body class="bg-black text-white p-12 overflow-hidden font-sans">
-    <div class="grid grid-cols-12 gap-12 h-[80vh] items-center">
-        <div class="col-span-8 flex flex-col justify-center pr-10 border-r-4 border-slate-900">
-            <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black mb-6 text-2xl">Current Question</h1>
+    
+    <div class="flex justify-between items-center mb-10 border-b-2 border-slate-900 pb-8">
+        <div>
+            <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black text-2xl">Bible Quiz Arena</h1>
+            <p id="status-tag" class="text-slate-500 font-mono text-sm">SYSTEM LIVE</p>
+        </div>
+        
+        <div id="timer-container" class="hidden flex items-center gap-6 bg-slate-900/50 px-8 py-4 rounded-2xl border border-slate-800">
+            <span class="text-slate-500 font-black uppercase tracking-widest text-xl">Time Remaining</span>
+            <div id="mon-timer" class="text-6xl font-black text-red-500 tabular-nums drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]">0s</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-12 h-[70vh] items-start">
+        <div class="col-span-8 flex flex-col justify-center h-full pr-10 border-r-4 border-slate-900">
             <div id="mon-q" class="text-7xl font-black leading-tight text-white drop-shadow-2xl transition-all duration-500">
                 Ready for the next Box...
             </div>
-            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500/50 font-bold hidden uppercase tracking-widest">0 POINTS</div>
+            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500 font-bold hidden uppercase tracking-[0.2em] bg-yellow-500/10 w-fit px-6 py-2 rounded-lg border border-yellow-500/20">
+                0 POINTS
+            </div>
         </div>
         
         <div class="col-span-4 flex flex-col h-full">
-            <h1 class="text-blue-500 uppercase tracking-widest font-black mb-10 text-xl border-b-2 border-blue-900 pb-4">Rankings</h1>
-            <div id="leaderboard" class="space-y-8 overflow-y-auto pr-2">
+            <h1 class="text-blue-500 uppercase tracking-widest font-black mb-8 text-xl border-b-2 border-blue-900 pb-4">Rankings</h1>
+            <div id="leaderboard" class="space-y-6 overflow-y-auto pr-2">
                 <p class="text-slate-500 italic">Connecting to players...</p>
             </div>
         </div>
     </div>
 
     <script>
-        // Your provided Script URL
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXkLDi63XErALlnkB8_QMBArIY-iu30c2MznQqRdChgXaSDZRBeeq72DpqCC7Qh5nl/exec";
+
+        let localTimer = 0;
+        let timerInterval;
 
         async function sync() {
             try {
-                // Use Cache-Buster to ensure fresh data
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
                 
                 const qEl = document.getElementById('mon-q');
                 const pEl = document.getElementById('mon-pts');
+                const tContainer = document.getElementById('timer-container');
                 const lbContainer = document.getElementById('leaderboard');
 
-                // 1. UPDATE QUESTION SECTION
+                // 1. UPDATE QUESTION & TIMER STATE
                 if(data.status === "ACTIVE") {
                     qEl.innerText = data.question;
                     pEl.innerText = data.points + " POINTS";
                     pEl.classList.remove('hidden');
+                    tContainer.classList.remove('hidden');
+                    
+                    // Sync the countdown timer
+                    startLocalCountdown(data.timer);
+                    
                     qEl.classList.remove('text-slate-700');
                     qEl.classList.add('text-white');
                 } else {
@@ -49,40 +70,60 @@
                     qEl.classList.remove('text-white');
                     qEl.classList.add('text-slate-700');
                     pEl.classList.add('hidden');
+                    tContainer.classList.add('hidden');
+                    clearInterval(timerInterval);
                 }
 
-                // 2. UPDATE LEADERBOARD SECTION
+                // 2. UPDATE LEADERBOARD
                 if (data.players && data.players.length > 0) {
-                    // Sort players by score: Highest to Lowest
                     const sortedPlayers = data.players.sort((a, b) => b.score - a.score);
-                    
-                    // Determine max score for bar scaling (minimum 100 to avoid huge bars at start)
                     const maxScore = Math.max(...sortedPlayers.map(p => p.score), 100);
 
                     lbContainer.innerHTML = sortedPlayers.map(player => `
-                        <div class="space-y-2 animate-in fade-in slide-in-from-right duration-500">
+                        <div class="space-y-2">
                             <div class="flex justify-between font-bold text-2xl uppercase tracking-tighter">
                                 <span>${player.name}</span>
                                 <span class="text-blue-400 font-mono">${player.score}</span>
                             </div>
-                            <div class="h-4 bg-slate-900 rounded-full border border-blue-900/50 overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-blue-700 to-blue-400 transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.3)]" 
+                            <div class="h-3 bg-slate-900 rounded-full border border-blue-900/50 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-700 to-blue-400 transition-all duration-1000" 
                                      style="width: ${(player.score / maxScore) * 100}%"></div>
                             </div>
                         </div>
                     `).join('');
-                } else {
-                    lbContainer.innerHTML = `<p class="text-slate-600 italic">Waiting for participants to register...</p>`;
                 }
-
             } catch(e) {
                 console.error("Monitor Sync Error:", e);
             }
         }
 
-        // Poll every 2.5 seconds
+        function startLocalCountdown(seconds) {
+            // Only restart if the time from the sheet is different from our current local count
+            // This prevents the timer from "jumping" back every 2.5 seconds during polling
+            if (Math.abs(localTimer - seconds) > 2) {
+                localTimer = seconds;
+            }
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (localTimer > 0) {
+                    localTimer--;
+                    document.getElementById('mon-timer').innerText = localTimer + "s";
+                    
+                    // Add pulse effect when time is low
+                    if (localTimer <= 5) {
+                        document.getElementById('mon-timer').classList.add('animate-pulse');
+                    } else {
+                        document.getElementById('mon-timer').classList.remove('animate-pulse');
+                    }
+                } else {
+                    document.getElementById('mon-timer').innerText = "0s";
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
+        }
+
         setInterval(sync, 2500);
-        // Initial run
         sync();
     </script>
 </body>
