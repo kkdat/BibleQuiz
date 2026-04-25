@@ -19,36 +19,39 @@
         <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center">
             <div id="m-pts" class="text-5xl font-black text-yellow-600 mb-2">0</div>
             <p id="m-que" class="text-xl font-bold mb-6 italic leading-tight"></p>
+            <p class="text-xs text-slate-400 uppercase tracking-widest mb-4">Correct Answer: <span id="m-ans" class="text-green-600 font-bold"></span></p>
+            
             <button id="pushBtn" onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 transition-all">DISPLAY TO MONITOR</button>
             <button onclick="closeModal()" class="mt-4 text-slate-500 hover:text-slate-800 underline block w-full">Cancel</button>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxozOjSYAFFeLAdDkN7eriwoJ1EW1ylILNKGDDq1xplomnwWNmwTRm419d5sd6djoKB/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKFDl8uUOuD_ouEH_m2WgLsCC0diyD2h6KSYcPA7zTJtZb8WPnWU1C_63SFV-5REtL/exec"; 
         let activeQ = null;
 
+        // Added 'ans' field to each question to track the correct answer
         const questions = [
-            { id: 1, p: 50, q: "Who was swallowed by a great fish?", c: "Jonah,Noah,Peter,Paul", t: 15 },
-            { id: 2, p: 50, q: "How many days did it rain during the Great Flood?", c: "7,12,40,100", t: 15 },
-            { id: 3, p: 75, q: "What was the first book of the Bible?", c: "Exodus,Genesis,Psalms,Matthew", t: 15 },
-            { id: 4, p: 75, q: "Who received the Ten Commandments?", c: "Abraham,Isaac,Moses,Joshua", t: 20 },
-            { id: 5, p: 100, q: "What did David use to defeat Goliath?", c: "Sword,Spear,Slingshot,Bow", t: 15 },
-            { id: 6, p: 100, q: "How many disciples did Jesus have?", c: "10,12,13,7", t: 15 },
-            { id: 7, p: 150, q: "Who was the oldest man in the Bible?", c: "Adam,Enoch,Methuselah,Noah", t: 20 },
-            { id: 8, p: 150, q: "What was the secret to Samson's strength?", c: "His belt,His hair,His shoes,His diet", t: 15 },
-            { id: 9, p: 200, q: "Which city's walls fell after Israel marched around it?", c: "Babylon,Jericho,Nineveh,Rome", t: 20 },
-            { id: 10, p: 200, q: "What did God use to lead the Israelites by night?", c: "A star,A map,A cloud,A pillar of fire", t: 15 },
-            { id: 11, p: 250, q: "Who was known as the 'Dreamer'?", c: "Joseph,Benjamin,Reuben,Levi", t: 20 },
-            { id: 12, p: 250, q: "What is the shortest verse in the Bible?", c: "God is love,Jesus wept,Pray always,Follow me", t: 15 },
-            { id: 13, p: 250, q: "Which apostle was a tax collector?", c: "Peter,Andrew,Matthew,Thomas", t: 20 },
-            { id: 14, p: 300, q: "What was the first miracle performed by Jesus?", c: "Healing,Water to wine,Walking on water,Raising Lazarus", t: 25 },
-            { id: 15, p: 300, q: "How many plagues did God send upon Egypt?", c: "7,10,12,3", t: 20 },
-            { id: 16, p: 400, q: "Who wrote the most books in the New Testament?", c: "Peter,John,Paul,Luke", t: 25 },
-            { id: 17, p: 400, q: "On what island was John when he wrote Revelation?", c: "Cyprus,Patmos,Malta,Crete", t: 25 },
-            { id: 18, p: 500, q: "Who was the first King of Israel?", c: "Saul,David,Solomon,Ahab", t: 25 },
-            { id: 19, p: 500, q: "What was the name of the mountain where Moses died?", c: "Sinai,Ararat,Nebo,Carmel", t: 25 },
-            { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", c: "Judah,Levi,Benjamin,Dan", t: 25 }
+            { id: 1, p: 50, q: "Who was swallowed by a great fish?", c: "Jonah,Noah,Peter,Paul", ans: "Jonah", t: 15 },
+            { id: 2, p: 50, q: "How many days did it rain during the Great Flood?", c: "7,12,40,100", ans: "40", t: 15 },
+            { id: 3, p: 75, q: "What was the first book of the Bible?", c: "Exodus,Genesis,Psalms,Matthew", ans: "Genesis", t: 15 },
+            { id: 4, p: 75, q: "Who received the Ten Commandments?", c: "Abraham,Isaac,Moses,Joshua", ans: "Moses", t: 20 },
+            { id: 5, p: 100, q: "What did David use to defeat Goliath?", c: "Sword,Spear,Slingshot,Bow", ans: "Slingshot", t: 15 },
+            { id: 6, p: 100, q: "How many disciples did Jesus have?", c: "10,12,13,7", ans: "12", t: 15 },
+            { id: 7, p: 150, q: "Who was the oldest man in the Bible?", c: "Adam,Enoch,Methuselah,Noah", ans: "Methuselah", t: 20 },
+            { id: 8, p: 150, q: "What was the secret to Samson's strength?", c: "His belt,His hair,His shoes,His diet", ans: "His hair", t: 15 },
+            { id: 9, p: 200, q: "Which city's walls fell after Israel marched around it?", c: "Babylon,Jericho,Nineveh,Rome", ans: "Jericho", t: 20 },
+            { id: 10, p: 200, q: "What did God use to lead the Israelites by night?", c: "A star,A map,A cloud,A pillar of fire", ans: "A pillar of fire", t: 15 },
+            { id: 11, p: 250, q: "Who was known as the 'Dreamer'?", c: "Joseph,Benjamin,Reuben,Levi", ans: "Joseph", t: 20 },
+            { id: 12, p: 250, q: "What is the shortest verse in the Bible?", c: "God is love,Jesus wept,Pray always,Follow me", ans: "Jesus wept", t: 15 },
+            { id: 13, p: 250, q: "Which apostle was a tax collector?", c: "Peter,Andrew,Matthew,Thomas", ans: "Matthew", t: 20 },
+            { id: 14, p: 300, q: "What was the first miracle performed by Jesus?", c: "Healing,Water to wine,Walking on water,Raising Lazarus", ans: "Water to wine", t: 25 },
+            { id: 15, p: 300, q: "How many plagues did God send upon Egypt?", c: "7,10,12,3", ans: "10", t: 20 },
+            { id: 16, p: 400, q: "Who wrote the most books in the New Testament?", c: "Peter,John,Paul,Luke", ans: "Paul", t: 25 },
+            { id: 17, p: 400, q: "On what island was John when he wrote Revelation?", c: "Cyprus,Patmos,Malta,Crete", ans: "Patmos", t: 25 },
+            { id: 18, p: 500, q: "Who was the first King of Israel?", c: "Saul,David,Solomon,Ahab", ans: "Saul", t: 25 },
+            { id: 19, p: 500, q: "What was the name of the mountain where Moses died?", c: "Sinai,Ararat,Nebo,Carmel", ans: "Nebo", t: 25 },
+            { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", c: "Judah,Levi,Benjamin,Dan", ans: "Levi", t: 25 }
         ];
 
         const grid = document.getElementById('grid');
@@ -60,6 +63,7 @@
                 activeQ = item;
                 document.getElementById('m-pts').innerText = item.p;
                 document.getElementById('m-que').innerText = item.q;
+                document.getElementById('m-ans').innerText = item.ans;
                 document.getElementById('modal').classList.remove('hidden');
             };
             grid.appendChild(btn);
@@ -68,16 +72,31 @@
         async function pushToLive() {
             const btn = document.getElementById('pushBtn');
             btn.innerText = "PUSHING..."; btn.disabled = true;
+            
             await fetch(SCRIPT_URL, {
-                method: "POST", mode: "no-cors",
-                body: JSON.stringify({ action: "pushQuestion", q: activeQ.q, p: activeQ.p, c: activeQ.c, t: activeQ.t })
+                method: "POST", 
+                mode: "no-cors",
+                body: JSON.stringify({ 
+                    action: "pushQuestion", 
+                    q: activeQ.q, 
+                    p: activeQ.p, 
+                    c: activeQ.c, 
+                    t: activeQ.t,
+                    ans: activeQ.ans // Sending correct answer to the sheet
+                })
             });
-            setTimeout(() => { alert("Question Sent!"); btn.innerText = "DISPLAY TO MONITOR"; btn.disabled = false; closeModal(); }, 500);
+            
+            setTimeout(() => { 
+                btn.innerText = "DISPLAY TO MONITOR"; 
+                btn.disabled = false; 
+                closeModal(); 
+            }, 500);
         }
 
         async function resetSystem() {
+            if(!confirm("Reset everything?")) return;
             await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "reset" }) });
-            alert("System Reset to Waiting State");
+            alert("System Reset");
         }
 
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
