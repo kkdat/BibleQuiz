@@ -5,40 +5,85 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Monitor - Bible Quiz</title>
 </head>
-<body class="bg-black text-white p-12 overflow-hidden">
+<body class="bg-black text-white p-12 overflow-hidden font-sans">
     <div class="grid grid-cols-12 gap-12 h-[80vh] items-center">
         <div class="col-span-8 flex flex-col justify-center pr-10 border-r-4 border-slate-900">
-            <h1 class="text-yellow-500 uppercase tracking-widest font-black mb-6">Current Question</h1>
-            <div id="mon-q" class="text-7xl font-black leading-tight">Waiting for Admin...</div>
-            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500 font-bold hidden">0 POINTS</div>
+            <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black mb-6 text-2xl">Current Question</h1>
+            <div id="mon-q" class="text-7xl font-black leading-tight text-white drop-shadow-2xl transition-all duration-500">
+                Ready for the next Box...
+            </div>
+            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500/50 font-bold hidden uppercase tracking-widest">0 POINTS</div>
         </div>
         
-        <div class="col-span-4 flex flex-col">
+        <div class="col-span-4 flex flex-col h-full">
             <h1 class="text-blue-500 uppercase tracking-widest font-black mb-10 text-xl border-b-2 border-blue-900 pb-4">Rankings</h1>
-            <div id="leaderboard" class="space-y-6">
-                <p class="text-slate-500 italic">No scores yet...</p>
+            <div id="leaderboard" class="space-y-8 overflow-y-auto pr-2">
+                <p class="text-slate-500 italic">Connecting to players...</p>
             </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxozOjSYAFFeLAdDkN7eriwoJ1EW1ylILNKGDDq1xplomnwWNmwTRm419d5sd6djoKB/exec";
+        // Your provided Script URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMIBoqoLgk5aFnhsvCBTk1jCwnHR48IHuMnsFls9vXw-DLYVy3EH2edwaOvefa6buF/exec";
 
         async function sync() {
             try {
+                // Use Cache-Buster to ensure fresh data
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
+                
+                const qEl = document.getElementById('mon-q');
+                const pEl = document.getElementById('mon-pts');
+                const lbContainer = document.getElementById('leaderboard');
+
+                // 1. UPDATE QUESTION SECTION
                 if(data.status === "ACTIVE") {
-                    document.getElementById('mon-q').innerText = data.question;
-                    document.getElementById('mon-pts').innerText = data.points + " POINTS";
-                    document.getElementById('mon-pts').classList.remove('hidden');
+                    qEl.innerText = data.question;
+                    pEl.innerText = data.points + " POINTS";
+                    pEl.classList.remove('hidden');
+                    qEl.classList.remove('text-slate-700');
+                    qEl.classList.add('text-white');
                 } else {
-                    document.getElementById('mon-q').innerText = "Ready for the next Box...";
-                    document.getElementById('mon-pts').classList.add('hidden');
+                    qEl.innerText = "Ready for the next Box...";
+                    qEl.classList.remove('text-white');
+                    qEl.classList.add('text-slate-700');
+                    pEl.classList.add('hidden');
                 }
-            } catch(e) {}
+
+                // 2. UPDATE LEADERBOARD SECTION
+                if (data.players && data.players.length > 0) {
+                    // Sort players by score: Highest to Lowest
+                    const sortedPlayers = data.players.sort((a, b) => b.score - a.score);
+                    
+                    // Determine max score for bar scaling (minimum 100 to avoid huge bars at start)
+                    const maxScore = Math.max(...sortedPlayers.map(p => p.score), 100);
+
+                    lbContainer.innerHTML = sortedPlayers.map(player => `
+                        <div class="space-y-2 animate-in fade-in slide-in-from-right duration-500">
+                            <div class="flex justify-between font-bold text-2xl uppercase tracking-tighter">
+                                <span>${player.name}</span>
+                                <span class="text-blue-400 font-mono">${player.score}</span>
+                            </div>
+                            <div class="h-4 bg-slate-900 rounded-full border border-blue-900/50 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-700 to-blue-400 transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.3)]" 
+                                     style="width: ${(player.score / maxScore) * 100}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    lbContainer.innerHTML = `<p class="text-slate-600 italic">Waiting for participants to register...</p>`;
+                }
+
+            } catch(e) {
+                console.error("Monitor Sync Error:", e);
+            }
         }
+
+        // Poll every 2.5 seconds
         setInterval(sync, 2500);
+        // Initial run
+        sync();
     </script>
 </body>
 </html>
