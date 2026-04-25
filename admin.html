@@ -6,22 +6,22 @@
     <title>Admin - Bible Quiz</title>
 </head>
 <body class="bg-slate-900 text-white p-8">
-    <h1 class="text-3xl font-bold text-yellow-500 mb-6">Briefcase Control Panel</h1>
+    <h1 class="text-3xl font-bold text-yellow-500 mb-6 text-center">Briefcase Control Panel</h1>
     
-    <div id="grid" class="grid grid-cols-5 gap-4 max-w-5xl mx-auto"></div>
+    <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto"></div>
 
-    <div id="modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4">
-        <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center">
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
             <div id="m-pts" class="text-5xl font-black text-yellow-600 mb-2">0</div>
-            <div class="text-sm uppercase tracking-widest mb-4 text-slate-400">Points Available</div>
-            <p id="m-que" class="text-xl font-bold mb-6 italic"></p>
-            <button onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700">DISPLAY TO MONITOR</button>
-            <button onclick="closeModal()" class="mt-4 text-slate-500 underline">Cancel</button>
+            <div class="text-sm uppercase tracking-widest mb-4 text-slate-400 font-bold">Points</div>
+            <p id="m-que" class="text-xl font-bold mb-6 italic leading-tight"></p>
+            <button id="pushBtn" onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 transition-all">DISPLAY TO MONITOR</button>
+            <button onclick="closeModal()" class="mt-4 text-slate-500 hover:text-slate-800 underline block w-full">Cancel</button>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoOT-6CEchAumFG4HpwgL045HMj022-h_k1W15V-WbTx8Czvlo2YiMWqlBJB3QAE8F/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRst4vC09rgL3kH7HGqpxMPfha8t-mMsObfOTL3O4SH5PyBrQKunrjtdj-r7gQt7fs/exec"; // PASTE YOUR URL HERE
         let activeQ = null;
 
         const questions = [
@@ -50,8 +50,8 @@
         const grid = document.getElementById('grid');
         questions.forEach(item => {
             const btn = document.createElement('div');
-            btn.className = "bg-slate-800 border-2 border-yellow-700/50 p-6 rounded-xl cursor-pointer hover:scale-105 transition text-center font-bold text-yellow-500";
-            btn.innerHTML = `💼<br>Box ${item.id}`;
+            btn.className = "bg-slate-800 border-2 border-yellow-700/30 p-6 rounded-xl cursor-pointer hover:border-yellow-400 hover:bg-slate-700 transition-all text-center font-bold text-yellow-500 shadow-lg";
+            btn.innerHTML = `<span class="text-3xl">💼</span><br>Box ${item.id}`;
             btn.onclick = () => {
                 activeQ = item;
                 document.getElementById('m-pts').innerText = item.p;
@@ -62,12 +62,29 @@
         });
 
         async function pushToLive() {
-            await fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "pushQuestion", q: activeQ.q, p: activeQ.p, c: activeQ.c, t: activeQ.t })
-            });
-            alert("Question Live!");
-            closeModal();
+            const btn = document.getElementById('pushBtn');
+            btn.innerText = "PUSHING...";
+            btn.disabled = true;
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors", 
+                    header: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "pushQuestion", q: activeQ.q, p: activeQ.p, c: activeQ.c, t: activeQ.t })
+                });
+                
+                // Since we use no-cors, we assume success after a small delay
+                setTimeout(() => {
+                    alert("Success! Check the Player screens.");
+                    btn.innerText = "DISPLAY TO MONITOR";
+                    btn.disabled = false;
+                    closeModal();
+                }, 800);
+            } catch (e) {
+                alert("Error connecting to Google Sheets.");
+                btn.disabled = false;
+            }
         }
 
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
