@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Quiz - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .briefcase { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .briefcase:hover { transform: scale(1.05); }
+        .revealed { background-color: #10b981 !important; color: white; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-8">
+
+    <header class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-yellow-500">Admin Control Panel</h1>
+        <p class="text-slate-400">Select a briefcase to reveal points and questions</p>
+    </header>
+
+    <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+        </div>
+
+    <div id="modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-xl p-8 max-w-2xl w-full text-center shadow-2xl">
+            <h2 id="modal-points" class="text-5xl font-black text-yellow-600 mb-4">00 PTS</h2>
+            <p id="modal-question" class="text-2xl font-medium mb-8">Question loading...</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="closeModal()" class="bg-slate-200 px-6 py-2 rounded-lg font-bold hover:bg-slate-300">Close</button>
+                <button onclick="pushToMonitor()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700">Display to Monitor</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulation of 20 boxes (In production, fetch these from Google Sheets)
+        const boxes = Array.from({ length: 20 }, (_, i) => ({
+            id: i + 1,
+            points: (i + 1) * 10,
+            question: `Bible Question #${i + 1}: Who lived to be 969 years old?`,
+            revealed: false
+        }));
+
+        const grid = document.getElementById('grid');
+
+        function renderGrid() {
+            grid.innerHTML = boxes.map(box => `
+                <div onclick="openBox(${box.id})" id="box-${box.id}" 
+                     class="briefcase h-32 bg-slate-800 border-2 border-yellow-600/30 rounded-lg flex flex-col items-center justify-center cursor-pointer shadow-lg hover:border-yellow-500">
+                    <span class="text-3xl">💼</span>
+                    <span class="font-bold mt-2 text-yellow-500">BOX ${box.id}</span>
+                </div>
+            `).join('');
+        }
+
+        function openBox(id) {
+            const box = boxes.find(b => b.id === id);
+            const modal = document.getElementById('modal');
+            
+            document.getElementById('modal-points').innerText = `${box.points} PTS`;
+            document.getElementById('modal-question').innerText = box.question;
+            
+            // Mark UI as revealed
+            document.getElementById(`box-${id}`).classList.add('revealed');
+            modal.classList.remove('hidden');
+
+            // Logic to update Google Sheet would go here via google.script.run
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        function pushToMonitor() {
+            alert("Sent to Score Monitoring UI!");
+            closeModal();
+        }
+
+        renderGrid();
+    </script>
+</body>
+</html>
