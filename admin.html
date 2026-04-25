@@ -12,24 +12,21 @@
             background: radial-gradient(circle at top left, #2e1065, #0f172a);
             min-height: 100vh;
         }
-        /* Glass effect for modal and specific elements */
         .glass {
-            background: rgba(255, 255, 255, 0.08); /* Lighter than before */
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
-        /* The main grid containers - Lighter and more visible */
         .glass-card {
-            background: rgba(255, 255, 255, 0.07); /* Lighter neutral base */
+            background: rgba(255, 255, 255, 0.07);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* Purple tint for the briefcase cards */
         .card-purple {
-            background: rgba(167, 139, 250, 0.12); /* Light purple tint */
+            background: rgba(167, 139, 250, 0.12);
             border-color: rgba(167, 139, 250, 0.25);
         }
         .glass-card:not(.spent):hover {
@@ -54,7 +51,7 @@
 </head>
 <body class="text-slate-200 p-6 md:p-12">
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
             <div>
                 <h1 class="text-4xl font-extrabold tracking-tight text-gradient">Briefcase Control</h1>
@@ -68,13 +65,12 @@
             </div>
         </header>
         
-        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8"></div>
     </div>
 
     <div id="modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
         <div class="glass border-purple-500/30 p-8 rounded-3xl max-w-lg w-full shadow-2xl relative overflow-hidden">
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-purple-600/20 blur-3xl rounded-full"></div>
-            
             <div class="relative">
                 <div class="flex justify-between items-start mb-8">
                     <div>
@@ -86,35 +82,21 @@
                         <div id="m-timer" class="text-4xl font-black tabular-nums text-white">0s</div>
                     </div>
                 </div>
-
                 <div class="bg-white/10 rounded-2xl p-6 mb-8 border border-white/10">
                     <p class="text-xs text-purple-300 uppercase font-bold mb-2 opacity-80">Active Question</p>
                     <p id="m-que" class="text-xl font-medium leading-relaxed text-white"></p>
                 </div>
-                
-                <div id="answer-box" class="mb-8 hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div id="answer-box" class="mb-8 hidden">
                     <div class="bg-emerald-500/20 border border-emerald-500/30 rounded-2xl p-4">
                         <p class="text-[10px] text-emerald-400 uppercase tracking-[0.2em] font-bold mb-1">Verified Answer</p>
                         <p id="m-ans" class="text-2xl font-bold text-emerald-300 uppercase"></p>
                     </div>
-                    
-                    <button onclick="resetSystem()" class="mt-6 w-full py-4 rounded-xl font-bold transition glass hover:bg-red-500/20 text-red-400 border-red-500/20">
-                        RESET & CLOSE SESSION
-                    </button>
+                    <button onclick="resetSystem()" class="mt-6 w-full py-4 rounded-xl font-bold transition glass hover:bg-red-500/20 text-red-400 border-red-500/20">RESET & CLOSE SESSION</button>
                 </div>
-                
                 <div id="control-btns" class="space-y-3">
-                    <button id="pushBtn" onclick="pushToLive()" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-purple-900/20 transition-all active:scale-95 flex items-center justify-center gap-2">
-                        🚀 PUSH TO MONITOR
-                    </button>
-                    
-                    <button id="revealBtn" onclick="revealAnswer()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 py-4 rounded-xl font-bold transition-all hidden shadow-xl shadow-amber-900/20">
-                        REVEAL CORRECT ANSWER
-                    </button>
-                    
-                    <button onclick="closeModal()" class="w-full py-3 text-slate-400 hover:text-white transition text-sm font-semibold">
-                        Cancel & Return
-                    </button>
+                    <button id="pushBtn" onclick="pushToLive()" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2">🚀 PUSH TO MONITOR</button>
+                    <button id="revealBtn" onclick="revealAnswer()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 py-4 rounded-xl font-bold transition-all hidden">REVEAL CORRECT ANSWER</button>
+                    <button onclick="closeModal()" class="w-full py-3 text-slate-400 hover:text-white transition text-sm font-semibold">Cancel & Return</button>
                 </div>
             </div>
         </div>
@@ -157,15 +139,16 @@
                 const isPlayed = playedQuestions.includes(item.id);
                 const btn = document.createElement('div');
                 btn.id = `box-${item.id}`;
-                btn.className = `glass-card card-purple p-8 rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
+                
+                // ADJUSTMENT: p-12 (larger padding) for a bigger box container
+                btn.className = `glass-card card-purple p-12 rounded-[2rem] cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
                 
                 btn.innerHTML = `
-                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <span class="text-2xl">${isPlayed ? '✔️' : '💼'}</span>
+                    <div class="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-purple-500/30 transition-all duration-300 shadow-inner">
+                        <span class="text-5xl">${isPlayed ? '✔️' : '💼'}</span>
                     </div>
-                    <div class="text-[10px] font-bold text-purple-300 tracking-widest uppercase">Box ${item.id}</div>
-                    <div class="text-xl font-extrabold text-white mt-1">${isPlayed ? 'DONE' : item.p}</div>
-                `;
+                    <div class="text-sm font-black text-purple-300 tracking-[0.2em] uppercase">Box ${item.id}</div>
+                    `;
 
                 btn.onclick = () => {
                     if (playedQuestions.includes(item.id)) {
@@ -177,12 +160,11 @@
             });
         }
 
-        // ... Logic for openQuestion, pushToLive, revealAnswer, resetSystem, etc remain same as your provided code
+        // Logic remains the same
         function openQuestion(item) {
             activeQ = item;
             timeLeft = item.t;
             document.getElementById('m-timer').innerText = timeLeft + "s";
-            document.getElementById('m-timer').className = 'text-4xl font-black tabular-nums text-white';
             document.getElementById('m-pts').innerText = item.p;
             document.getElementById('m-que').innerText = item.q;
             document.getElementById('m-ans').innerText = item.ans;
@@ -221,7 +203,6 @@
                 } else {
                     clearInterval(countdownInterval);
                     timerEl.innerText = "TIME'S UP";
-                    timerEl.classList.replace('text-red-500', 'text-slate-500');
                     document.getElementById('revealBtn').classList.remove('hidden');
                     document.getElementById('pushBtn').classList.add('hidden');
                 }
@@ -244,7 +225,7 @@
             document.getElementById('modal').classList.add('hidden'); 
             clearInterval(countdownInterval);
             const btn = document.getElementById('pushBtn');
-            btn.className = "w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-purple-900/20 transition-all active:scale-95 flex items-center justify-center gap-2";
+            btn.className = "w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2";
             btn.innerHTML = "🚀 PUSH TO MONITOR";
             btn.disabled = false;
         }
