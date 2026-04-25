@@ -10,12 +10,11 @@
     <div class="flex justify-between items-center mb-10 border-b-2 border-slate-900 pb-8">
         <div>
             <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black text-2xl">Bible Quiz Arena</h1>
-            <p id="status-tag" class="text-slate-500 font-mono text-sm">SYSTEM LIVE</p>
+            <p id="status-tag" class="text-slate-500 font-mono text-sm uppercase tracking-widest">Live Broadcast Mode</p>
         </div>
-        
-        <div id="timer-container" class="hidden flex items-center gap-6 bg-slate-900/50 px-8 py-4 rounded-2xl border border-slate-800">
-            <span class="text-slate-500 font-black uppercase tracking-widest text-xl">Time Remaining</span>
-            <div id="mon-timer" class="text-6xl font-black text-red-500 tabular-nums drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]">0s</div>
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span class="text-slate-400 font-bold text-sm uppercase">Connection Active</span>
         </div>
     </div>
 
@@ -40,9 +39,6 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXkLDi63XErALlnkB8_QMBArIY-iu30c2MznQqRdChgXaSDZRBeeq72DpqCC7Qh5nl/exec";
 
-        let localTimer = 0;
-        let timerInterval;
-
         async function sync() {
             try {
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
@@ -50,18 +46,13 @@
                 
                 const qEl = document.getElementById('mon-q');
                 const pEl = document.getElementById('mon-pts');
-                const tContainer = document.getElementById('timer-container');
                 const lbContainer = document.getElementById('leaderboard');
 
-                // 1. UPDATE QUESTION & TIMER STATE
+                // 1. UPDATE QUESTION STATE
                 if(data.status === "ACTIVE") {
                     qEl.innerText = data.question;
                     pEl.innerText = data.points + " POINTS";
                     pEl.classList.remove('hidden');
-                    tContainer.classList.remove('hidden');
-                    
-                    // Sync the countdown timer
-                    startLocalCountdown(data.timer);
                     
                     qEl.classList.remove('text-slate-700');
                     qEl.classList.add('text-white');
@@ -70,8 +61,6 @@
                     qEl.classList.remove('text-white');
                     qEl.classList.add('text-slate-700');
                     pEl.classList.add('hidden');
-                    tContainer.classList.add('hidden');
-                    clearInterval(timerInterval);
                 }
 
                 // 2. UPDATE LEADERBOARD
@@ -97,32 +86,7 @@
             }
         }
 
-        function startLocalCountdown(seconds) {
-            // Only restart if the time from the sheet is different from our current local count
-            // This prevents the timer from "jumping" back every 2.5 seconds during polling
-            if (Math.abs(localTimer - seconds) > 2) {
-                localTimer = seconds;
-            }
-
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (localTimer > 0) {
-                    localTimer--;
-                    document.getElementById('mon-timer').innerText = localTimer + "s";
-                    
-                    // Add pulse effect when time is low
-                    if (localTimer <= 5) {
-                        document.getElementById('mon-timer').classList.add('animate-pulse');
-                    } else {
-                        document.getElementById('mon-timer').classList.remove('animate-pulse');
-                    }
-                } else {
-                    document.getElementById('mon-timer').innerText = "0s";
-                    clearInterval(timerInterval);
-                }
-            }, 1000);
-        }
-
+        // Poll every 2.5 seconds for fresh scores and questions
         setInterval(sync, 2500);
         sync();
     </script>
