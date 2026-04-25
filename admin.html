@@ -74,7 +74,6 @@
                 activeQ = item;
                 timeLeft = item.t;
                 
-                // Reset Modal UI
                 document.getElementById('m-timer').innerText = timeLeft + "s";
                 document.getElementById('m-timer').classList.remove('animate-pulse', 'text-slate-400');
                 document.getElementById('m-timer').classList.add('text-red-600');
@@ -82,7 +81,6 @@
                 document.getElementById('m-que').innerText = item.q;
                 document.getElementById('m-ans').innerText = item.ans;
                 
-                // Hide Answer & Reveal Button
                 document.getElementById('answer-box').classList.add('hidden');
                 document.getElementById('revealBtn').classList.add('hidden');
                 document.getElementById('pushBtn').classList.remove('hidden');
@@ -102,7 +100,11 @@
                 mode: "no-cors",
                 body: JSON.stringify({ 
                     action: "pushQuestion", 
-                    q: activeQ.q, p: activeQ.p, c: activeQ.c, t: activeQ.t, ans: activeQ.ans 
+                    q: activeQ.q, 
+                    p: activeQ.p, 
+                    t: activeQ.t, 
+                    ans: activeQ.ans,
+                    reveal: false // CRITICAL: Reset reveal status on new question
                 })
             });
             
@@ -123,16 +125,26 @@
                     document.getElementById('m-timer').innerText = "TIME UP!";
                     document.getElementById('m-timer').classList.replace('text-red-600', 'text-slate-400');
                     
-                    // Show the Reveal Button
                     document.getElementById('revealBtn').classList.remove('hidden');
                     document.getElementById('pushBtn').classList.add('hidden');
                 }
             }, 1000);
         }
 
-        function revealAnswer() {
+        async function revealAnswer() {
+            // Local UI Update
             document.getElementById('answer-box').classList.remove('hidden');
             document.getElementById('revealBtn').classList.add('hidden');
+
+            // Sheet Update
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({ 
+                    action: "revealAnswer", 
+                    reveal: true 
+                })
+            });
         }
 
         async function resetSystem() {
@@ -145,7 +157,8 @@
             document.getElementById('modal').classList.add('hidden'); 
             clearInterval(countdownInterval);
             const btn = document.getElementById('pushBtn');
-            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            btn.classList.remove('bg-blue-600');
+            btn.classList.add('bg-green-600');
             btn.innerText = "DISPLAY TO MONITOR";
             btn.disabled = false;
         }
