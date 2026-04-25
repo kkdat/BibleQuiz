@@ -5,38 +5,52 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Monitor - Bible Quiz</title>
 </head>
-<body class="bg-black text-white p-10 overflow-hidden">
-    <div class="grid grid-cols-3 gap-10 h-screen">
-        <div class="col-span-2 flex flex-col justify-center border-r border-slate-800 pr-10">
-            <h1 class="text-yellow-500 uppercase tracking-widest font-bold mb-4">Current Question</h1>
-            <div id="mon-q" class="text-5xl font-bold leading-tight">Ready...</div>
+<body class="bg-black text-white p-12 overflow-hidden font-sans">
+    <div class="grid grid-cols-12 gap-12 h-[80vh] items-center">
+        <div class="col-span-8 flex flex-col justify-center pr-10 border-r-4 border-slate-900">
+            <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black mb-6 text-2xl">Current Question</h1>
+            <div id="mon-q" class="text-7xl font-black leading-tight text-white drop-shadow-2xl">
+                Ready for Round 1...
+            </div>
+            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500/50 font-bold hidden">0 POINTS</div>
         </div>
         
-        <div class="flex flex-col">
-            <h1 class="text-blue-500 uppercase tracking-widest font-bold mb-8">Leaderboard</h1>
-            <div id="leaderboard" class="space-y-8 flex-1">
-                <div class="space-y-2">
-                    <div class="flex justify-between text-sm"><span id="p1-name">Player 1</span><span id="p1-score">0</span></div>
-                    <div id="p1-bar" class="h-4 bg-blue-600 rounded-full transition-all duration-1000" style="width: 10%"></div>
+        <div class="col-span-4 flex flex-col h-full">
+            <h1 class="text-blue-500 uppercase tracking-widest font-black mb-10 text-xl border-b-2 border-blue-900 pb-4">Rankings</h1>
+            <div id="leaderboard" class="space-y-10">
+                <div class="space-y-3">
+                    <div class="flex justify-between font-bold text-2xl"><span>Top Player</span><span>1,250</span></div>
+                    <div class="h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]" style="width: 85%"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoOT-6CEchAumFG4HpwgL045HMj022-h_k1W15V-WbTx8Czvlo2YiMWqlBJB3QAE8F/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRst4vC09rgL3kH7HGqpxMPfha8t-mMsObfOTL3O4SH5PyBrQKunrjtdj-r7gQt7fs/exec";
 
         async function sync() {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            if(data.status === "ACTIVE") {
-                document.getElementById('mon-q').innerText = data.question;
-            } else {
-                document.getElementById('mon-q').innerText = "Waiting for next box...";
-            }
+            try {
+                const res = await fetch(`${SCRIPT_URL}?v=${Math.random()}`);
+                const data = await res.json();
+                const qEl = document.getElementById('mon-q');
+                const pEl = document.getElementById('mon-pts');
+
+                if(data.status === "ACTIVE") {
+                    qEl.innerText = data.question;
+                    pEl.innerText = data.points + " POINTS";
+                    pEl.classList.remove('hidden');
+                    qEl.classList.add('text-white');
+                } else {
+                    qEl.innerText = "OPEN A BRIEFCASE...";
+                    qEl.classList.remove('text-white');
+                    qEl.classList.add('text-slate-700');
+                    pEl.classList.add('hidden');
+                }
+            } catch(e) {}
         }
 
-        setInterval(sync, 3000);
+        setInterval(sync, 2500);
     </script>
 </body>
 </html>
