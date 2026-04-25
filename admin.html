@@ -37,32 +37,32 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAPYNzbmjj37FL6NlIUAIvuae3lO83pbvM1Wg8HAOTCiK-3O0LUPDhegQ4-y6sxWI/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPG7UDoW92RHxBcHI5UNGTFoOe6RF6Al-4xG-oN0GxSSrFZ8xIyFKCtKavcm79gZFt/exec"; 
         let activeQ = null;
         let countdownInterval = null;
         let timeLeft = 0;
 
         const questions = [
-            { id: 1, p: 50, q: "Who was swallowed by a great fish?", c: "Jonah,Noah,Peter,Paul", ans: "Jonah", t: 15 },
-            { id: 2, p: 50, q: "How many days did it rain during the Great Flood?", c: "7,12,40,100", ans: "40", t: 15 },
-            { id: 3, p: 75, q: "What was the first book of the Bible?", c: "Exodus,Genesis,Psalms,Matthew", ans: "Genesis", t: 15 },
-            { id: 4, p: 75, q: "Who received the Ten Commandments?", c: "Abraham,Isaac,Moses,Joshua", ans: "Moses", t: 20 },
-            { id: 5, p: 100, q: "What did David use to defeat Goliath?", c: "Sword,Spear,Slingshot,Bow", ans: "Slingshot", t: 15 },
-            { id: 6, p: 100, q: "How many disciples did Jesus have?", c: "10,12,13,7", ans: "12", t: 15 },
-            { id: 7, p: 150, q: "Who was the oldest man in the Bible?", c: "Adam,Enoch,Methuselah,Noah", ans: "Methuselah", t: 20 },
-            { id: 8, p: 150, q: "What was the secret to Samson's strength?", c: "His belt,His hair,His shoes,His diet", ans: "His hair", t: 15 },
-            { id: 9, p: 200, q: "Which city's walls fell after Israel marched around it?", c: "Babylon,Jericho,Nineveh,Rome", ans: "Jericho", t: 20 },
-            { id: 10, p: 200, q: "What did God use to lead the Israelites by night?", c: "A star,A map,A cloud,A pillar of fire", ans: "A pillar of fire", t: 15 },
-            { id: 11, p: 250, q: "Who was known as the 'Dreamer'?", c: "Joseph,Benjamin,Reuben,Levi", ans: "Joseph", t: 20 },
-            { id: 12, p: 250, q: "What is the shortest verse in the Bible?", c: "God is love,Jesus wept,Pray always,Follow me", ans: "Jesus wept", t: 15 },
-            { id: 13, p: 250, q: "Which apostle was a tax collector?", c: "Peter,Andrew,Matthew,Thomas", ans: "Matthew", t: 20 },
-            { id: 14, p: 300, q: "What was the first miracle performed by Jesus?", c: "Healing,Water to wine,Walking on water,Raising Lazarus", ans: "Water to wine", t: 25 },
-            { id: 15, p: 300, q: "How many plagues did God send upon Egypt?", c: "7,10,12,3", ans: "10", t: 20 },
-            { id: 16, p: 400, q: "Who wrote the most books in the New Testament?", c: "Peter,John,Paul,Luke", ans: "Paul", t: 25 },
-            { id: 17, p: 400, q: "On what island was John when he wrote Revelation?", c: "Cyprus,Patmos,Malta,Crete", ans: "Patmos", t: 25 },
-            { id: 18, p: 500, q: "Who was the first King of Israel?", c: "Saul,David,Solomon,Ahab", ans: "Saul", t: 25 },
-            { id: 19, p: 500, q: "What was the name of the mountain where Moses died?", c: "Sinai,Ararat,Nebo,Carmel", ans: "Nebo", t: 25 },
-            { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", c: "Judah,Levi,Benjamin,Dan", ans: "Levi", t: 25 }
+            { id: 1, p: 50, q: "Who was swallowed by a great fish?", ans: "Jonah", t: 10 },
+            { id: 2, p: 50, q: "How many days did it rain during the Great Flood?", ans: "40", t: 10 },
+            { id: 3, p: 75, q: "What was the first book of the Bible?", ans: "Genesis", t: 10 },
+            { id: 4, p: 75, q: "Who received the Ten Commandments?", ans: "Moses", t:10 },
+            { id: 5, p: 100, q: "What did David use to defeat Goliath?", ans: "Slingshot", t: 10 },
+            { id: 6, p: 100, q: "How many disciples did Jesus have?", ans: "12", t: 10 },
+            { id: 7, p: 150, q: "Who was the oldest man in the Bible?", ans: "Methuselah", t: 10 },
+            { id: 8, p: 150, q: "What was the secret to Samson's strength?", ans: "His hair", t: 10 },
+            { id: 9, p: 200, q: "Which city's walls fell after Israel marched around it?", ans: "Jericho", t: 10 },
+            { id: 10, p: 200, q: "What did God use to lead the Israelites by night?", ans: "A pillar of fire", t: 10 },
+            { id: 11, p: 250, q: "Who was known as the 'Dreamer'?", ans: "Joseph", t: 10 },
+            { id: 12, p: 250, q: "What is the shortest verse in the Bible?", ans: "Jesus wept", t: 10 },
+            { id: 13, p: 250, q: "Which apostle was a tax collector?", ans: "Matthew", t: 10 },
+            { id: 14, p: 300, q: "What was the first miracle performed by Jesus?", ans: "Water to wine", t: 10 },
+            { id: 15, p: 300, q: "How many plagues did God send upon Egypt?", ans: "10", t: 10 },
+            { id: 16, p: 400, q: "Who wrote the most books in the New Testament?", ans: "Paul", t: 10 },
+            { id: 17, p: 400, q: "On what island was John when he wrote Revelation?", ans: "Patmos", t: 10 },
+            { id: 18, p: 500, q: "Who was the first King of Israel?", ans: "Saul", t: 10 },
+            { id: 19, p: 500, q: "What was the name of the mountain where Moses died?", ans: "Nebo", t: 10 },
+            { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", ans: "Levi", t: 10 }
         ];
 
         const grid = document.getElementById('grid');
