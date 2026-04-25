@@ -1,39 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .bar { transition: width 1s ease-in-out; }
-    </style>
+    <title>Monitor - Bible Quiz</title>
 </head>
-<body class="bg-black text-white p-12">
-    <div class="grid grid-cols-2 gap-12">
-        <div>
-            <h1 class="text-4xl font-bold text-yellow-500 mb-8">Live Question</h1>
-            <div id="display-box" class="bg-slate-900 p-10 rounded-3xl border-4 border-yellow-600">
-                <p id="monitor-q" class="text-3xl font-medium italic">Ready for the next round...</p>
-            </div>
+<body class="bg-black text-white p-10 overflow-hidden">
+    <div class="grid grid-cols-3 gap-10 h-screen">
+        <div class="col-span-2 flex flex-col justify-center border-r border-slate-800 pr-10">
+            <h1 class="text-yellow-500 uppercase tracking-widest font-bold mb-4">Current Question</h1>
+            <div id="mon-q" class="text-5xl font-bold leading-tight">Ready...</div>
         </div>
-        <div>
-            <h1 class="text-4xl font-bold text-blue-500 mb-8">Leaderboard</h1>
-            <div id="leaderboard" class="space-y-6">
+        
+        <div class="flex flex-col">
+            <h1 class="text-blue-500 uppercase tracking-widest font-bold mb-8">Leaderboard</h1>
+            <div id="leaderboard" class="space-y-8 flex-1">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm"><span id="p1-name">Player 1</span><span id="p1-score">0</span></div>
+                    <div id="p1-bar" class="h-4 bg-blue-600 rounded-full transition-all duration-1000" style="width: 10%"></div>
                 </div>
+            </div>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoOT-6CEchAumFG4HpwgL045HMj022-h_k1W15V-WbTx8Czvlo2YiMWqlBJB3QAE8F/exec";
 
-        async function updateMonitor() {
+        async function sync() {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
             if(data.status === "ACTIVE") {
-                document.getElementById('monitor-q').innerText = data.question;
+                document.getElementById('mon-q').innerText = data.question;
+            } else {
+                document.getElementById('mon-q').innerText = "Waiting for next box...";
             }
-            // Add leaderboard fetching logic here to update bars
         }
 
-        setInterval(updateMonitor, 3000);
+        setInterval(sync, 3000);
     </script>
 </body>
 </html>
