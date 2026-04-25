@@ -24,11 +24,18 @@
             border: 1px solid rgba(167, 139, 250, 0.2);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .glass-card:hover {
+        .glass-card:not(.spent):hover {
             background: rgba(139, 92, 246, 0.25);
             border-color: rgba(167, 139, 250, 0.5);
             transform: translateY(-4px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        /* Style for played boxes */
+        .glass-card.spent {
+            opacity: 0.4;
+            filter: grayscale(0.8);
+            cursor: default;
+            border-color: rgba(255, 255, 255, 0.05);
         }
         .text-gradient {
             background: linear-gradient(to right, #c084fc, #818cf8);
@@ -45,8 +52,11 @@
                 <h1 class="text-4xl font-extrabold tracking-tight text-gradient">Briefcase Control</h1>
                 <p class="text-slate-400 text-sm mt-1 uppercase tracking-widest">Master Administrator Console</p>
             </div>
-            <div class="px-4 py-2 rounded-full glass text-xs font-semibold flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> SYSTEM LIVE
+            <div class="flex items-center gap-4">
+                <button onclick="clearHistory()" class="text-[10px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest transition">Clear History</button>
+                <div class="px-4 py-2 rounded-full glass text-xs font-semibold flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> SYSTEM LIVE
+                </div>
             </div>
         </header>
         
@@ -103,11 +113,13 @@
     </div>
 
     <script>
-        // ... (Keep your SCRIPT_URL and data same) ...
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec"; 
         let activeQ = null;
         let countdownInterval = null;
         let timeLeft = 0;
+        
+        // Track played questions using LocalStorage
+        let playedQuestions = JSON.parse(localStorage.getItem('playedBibleQuiz')) || [];
 
         const questions = [
             { id: 1, p: 50, q: "Who was swallowed by a great fish?", ans: "Jonah", t: 10 },
@@ -132,40 +144,53 @@
             { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", ans: "Levi", t: 10 }
         ];
 
-        const grid = document.getElementById('grid');
-        questions.forEach(item => {
-            const btn = document.createElement('div');
-            btn.className = "glass-card p-8 rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center group";
-            btn.innerHTML = `
-                <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <span class="text-2xl">💼</span>
-                </div>
-                <div class="text-xs font-bold text-purple-400 tracking-widest uppercase">Box ${item.id}</div>
-                <div class="text-xl font-extrabold text-white mt-1">${item.p}</div>
-            `;
-            btn.onclick = () => {
-                activeQ = item;
-                timeLeft = item.t;
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            questions.forEach(item => {
+                const isPlayed = playedQuestions.includes(item.id);
+                const btn = document.createElement('div');
+                btn.id = `box-${item.id}`;
+                btn.className = `glass-card p-8 rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
                 
-                document.getElementById('m-timer').innerText = timeLeft + "s";
-                document.getElementById('m-timer').className = 'text-4xl font-black tabular-nums text-white';
-                document.getElementById('m-pts').innerText = item.p;
-                document.getElementById('m-que').innerText = item.q;
-                document.getElementById('m-ans').innerText = item.ans;
-                
-                document.getElementById('answer-box').classList.add('hidden');
-                document.getElementById('revealBtn').classList.add('hidden');
-                document.getElementById('pushBtn').classList.remove('hidden');
-                
-                document.getElementById('modal').classList.remove('hidden');
-                clearInterval(countdownInterval);
-            };
-            grid.appendChild(btn);
-        });
+                btn.innerHTML = `
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <span class="text-2xl">${isPlayed ? '✔️' : '💼'}</span>
+                    </div>
+                    <div class="text-xs font-bold text-purple-400 tracking-widest uppercase">Box ${item.id}</div>
+                    <div class="text-xl font-extrabold text-white mt-1">${isPlayed ? 'DONE' : item.p}</div>
+                `;
+
+                btn.onclick = () => {
+                    if (playedQuestions.includes(item.id)) {
+                        if(!confirm("This box was already played. Open it again?")) return;
+                    }
+                    openQuestion(item);
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function openQuestion(item) {
+            activeQ = item;
+            timeLeft = item.t;
+            
+            document.getElementById('m-timer').innerText = timeLeft + "s";
+            document.getElementById('m-timer').className = 'text-4xl font-black tabular-nums text-white';
+            document.getElementById('m-pts').innerText = item.p;
+            document.getElementById('m-que').innerText = item.q;
+            document.getElementById('m-ans').innerText = item.ans;
+            
+            document.getElementById('answer-box').classList.add('hidden');
+            document.getElementById('revealBtn').classList.add('hidden');
+            document.getElementById('pushBtn').classList.remove('hidden');
+            
+            document.getElementById('modal').classList.remove('hidden');
+            clearInterval(countdownInterval);
+        }
 
         async function pushToLive() {
             const btn = document.getElementById('pushBtn');
-            const originalText = btn.innerHTML;
             btn.innerHTML = "<span>⏳ SENDING...</span>"; btn.disabled = true;
             
             await fetch(SCRIPT_URL, {
@@ -181,11 +206,19 @@
                 })
             });
             
+            // Mark as played
+            if (!playedQuestions.includes(activeQ.id)) {
+                playedQuestions.push(activeQ.id);
+                localStorage.setItem('playedBibleQuiz', JSON.stringify(playedQuestions));
+                renderGrid(); // Refresh visual state
+            }
+
             btn.innerHTML = "<span>✅ BROADCASTING</span>";
             btn.classList.replace('bg-purple-600', 'bg-blue-600');
             startTimer();
         }
 
+        // Timer, Reveal, Reset functions... (Keep previous logic)
         function startTimer() {
             clearInterval(countdownInterval);
             const timerEl = document.getElementById('m-timer');
@@ -232,6 +265,17 @@
             btn.innerHTML = "🚀 PUSH TO MONITOR";
             btn.disabled = false;
         }
+
+        function clearHistory() {
+            if(confirm("Reset all boxes and clear history?")) {
+                playedQuestions = [];
+                localStorage.removeItem('playedBibleQuiz');
+                renderGrid();
+            }
+        }
+
+        // Initialize grid on load
+        renderGrid();
     </script>
 </body>
 </html>
