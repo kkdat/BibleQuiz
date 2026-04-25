@@ -9,27 +9,27 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            /* Very light, clean gradient */
-            background: radial-gradient(circle at top right, #fdfcfd, #e2e8f0);
+            /* Updated to a darker, richer light gradient */
+            background: radial-gradient(circle at top right, #e8e8ea, #cbd5e1);
             min-height: 100vh;
-            color: #1e293b; /* Darker slate for general text */
+            color: #111827; /* Darker text for high contrast */
         }
 
         .glass {
-            /* Adjusted for light background: white with subtle shadow */
-            background: rgba(255, 255, 255, 0.6);
+            /* Adjusted glass for slightly darker background: higher contrast white */
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.07);
         }
 
         /* Specific colors for the Header */
         .text-balikatan {
-            color: #7c3aed; /* Deep Purple */
+            color: #6d28d9; /* Deep Purple */
         }
         .text-bible-quiz {
-            color: #2563eb; /* Strong Blue */
+            color: #1d4ed8; /* Strong Blue */
         }
 
         @keyframes reveal-pop {
@@ -49,7 +49,7 @@
 </head>
 <body class="p-8 md:p-16 overflow-hidden">
     
-    <div class="flex justify-between items-end mb-16 border-b border-slate-300 pb-10">
+    <div class="flex justify-between items-end mb-16 border-b border-slate-400 pb-10">
         <div>
             <h1 class="uppercase tracking-[0.4em] font-extrabold text-3xl">
                 <span class="text-balikatan">Balikatan</span> 
@@ -60,29 +60,29 @@
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
                 </span>
-                <p id="status-tag" class="text-slate-500 font-bold text-xs uppercase tracking-[0.2em]">Live Signal: Secure</p>
+                <p id="status-tag" class="text-slate-600 font-bold text-xs uppercase tracking-[0.2em]">Live Signal: Secure</p>
             </div>
         </div>
         <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
-            <span class="text-slate-500 text-xs font-bold uppercase tracking-widest">Global Status</span>
-            <span class="text-emerald-600 font-black text-sm uppercase">Active</span>
+            <span class="text-slate-600 text-xs font-bold uppercase tracking-widest">Global Status</span>
+            <span class="text-emerald-700 font-black text-sm uppercase">Active</span>
         </div>
     </div>
 
     <div class="grid grid-cols-12 gap-16 h-[65vh] items-start">
         
         <div class="col-span-8 flex flex-col justify-center h-full relative pr-4">
-            <div id="mon-pts" class="mb-6 text-xl text-blue-700 font-bold hidden uppercase tracking-[0.3em] bg-blue-100 w-fit px-5 py-1.5 rounded-full border border-blue-200">
+            <div id="mon-pts" class="mb-6 text-xl text-blue-800 font-bold hidden uppercase tracking-[0.3em] bg-blue-100/70 w-fit px-5 py-1.5 rounded-full border border-blue-300">
                 0 POINTS
             </div>
             
-            <div id="mon-q" class="text-6xl md:text-7xl font-extrabold leading-[1.15] text-slate-900 transition-all duration-700 ease-out">
+            <div id="mon-q" class="text-6xl md:text-7xl font-extrabold leading-[1.15] text-slate-950 transition-all duration-700 ease-out">
                 Ready for the next Question...
             </div>
             
-            <div id="mon-ans-container" class="absolute inset-0 glass bg-white/90 hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border-blue-200 reveal-anim z-20 shadow-2xl">
-                <span class="text-emerald-600 font-bold tracking-[0.4em] uppercase text-sm mb-6 bg-emerald-50 px-4 py-1 rounded-full border border-emerald-200">Correct Revelation</span>
-                <div id="mon-ans-text" class="text-7xl md:text-9xl font-black text-slate-900 uppercase tracking-tight">
+            <div id="mon-ans-container" class="absolute inset-0 glass bg-white/95 hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border-blue-300 reveal-anim z-20 shadow-2xl">
+                <span class="text-emerald-700 font-bold tracking-[0.4em] uppercase text-sm mb-6 bg-emerald-100/70 px-4 py-1 rounded-full border border-emerald-300">Correct Revelation</span>
+                <div id="mon-ans-text" class="text-7xl md:text-9xl font-black text-slate-950 uppercase tracking-tight">
                     ---
                 </div>
             </div>
@@ -90,14 +90,14 @@
         
         <div class="col-span-4 h-full flex flex-col">
             <div class="glass rounded-[2rem] p-8 h-full flex flex-col">
-                <h2 class="text-slate-800 uppercase tracking-widest font-extrabold mb-8 text-sm flex items-center gap-2">
+                <h2 class="text-slate-900 uppercase tracking-widest font-extrabold mb-8 text-sm flex items-center gap-2">
                     <span class="w-2 h-2 bg-blue-600 rounded-full"></span> Top Contenders
                 </h2>
                 
                 <div id="leaderboard" class="space-y-8 overflow-y-auto pr-4 flex-grow">
                     <div class="animate-pulse space-y-4">
-                        <div class="h-8 bg-slate-200 rounded-lg w-3/4"></div>
-                        <div class="h-8 bg-slate-200 rounded-lg w-1/2"></div>
+                        <div class="h-8 bg-slate-300 rounded-lg w-3/4"></div>
+                        <div class="h-8 bg-slate-300 rounded-lg w-1/2"></div>
                     </div>
                 </div>
             </div>
@@ -147,13 +147,13 @@
                         <div class="space-y-3 group">
                             <div class="flex justify-between items-end">
                                 <div class="flex items-center gap-3">
-                                    <span class="text-xs font-bold text-slate-400">0${idx + 1}</span>
-                                    <span class="font-bold text-xl uppercase tracking-tighter text-slate-800">${player.name}</span>
+                                    <span class="text-xs font-bold text-slate-500">0${idx + 1}</span>
+                                    <span class="font-bold text-xl uppercase tracking-tighter text-slate-900">${player.name}</span>
                                 </div>
-                                <span class="text-blue-600 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
+                                <span class="text-blue-700 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
                             </div>
-                            <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-500 transition-all duration-1000" 
+                            <div class="h-1.5 bg-slate-300 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-700 to-indigo-500 transition-all duration-1000" 
                                      style="width: ${(player.score / maxScore) * 100}%"></div>
                             </div>
                         </div>
