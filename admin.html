@@ -2,40 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Admin - Bible Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Admin - Bible Quiz Pro</title>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #2e1065, #0f172a);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card {
+            background: rgba(88, 28, 135, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:not(.spent):hover {
+            background: rgba(139, 92, 246, 0.25);
+            border-color: rgba(167, 139, 250, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        /* Style for played boxes */
+        .glass-card.spent {
+            opacity: 0.4;
+            filter: grayscale(0.8);
+            cursor: default;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #c084fc, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white p-8">
-    <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-3xl font-bold text-yellow-500">Briefcase Control Panel</h1>
+<body class="text-slate-200 p-6 md:p-12">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
+            <div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-gradient">Briefcase Control</h1>
+                <p class="text-slate-400 text-sm mt-1 uppercase tracking-widest">Master Administrator Console</p>
             </div>
+            <div class="flex items-center gap-4">
+                <button onclick="clearHistory()" class="text-[10px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest transition">Clear History</button>
+                <div class="px-4 py-2 rounded-full glass text-xs font-semibold flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> SYSTEM LIVE
+                </div>
+            </div>
+        </header>
         
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl border-4 border-yellow-500">
+    <div id="modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="glass border-purple-500/30 p-8 rounded-3xl max-w-lg w-full shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-purple-600/20 blur-3xl rounded-full"></div>
             
-            <div id="m-timer" class="text-6xl font-black text-red-600 mb-4 tabular-nums">0s</div>
-            
-            <div id="m-pts" class="text-4xl font-black text-yellow-600 mb-2 underline">0</div>
-            <p id="m-que" class="text-xl font-bold mb-6 italic leading-tight"></p>
-            
-            <div id="answer-box" class="mb-6 hidden">
-                <p class="text-xs text-slate-400 uppercase tracking-widest">Correct Answer:</p>
-                <p id="m-ans" class="text-2xl font-black text-green-600 uppercase"></p>
+            <div class="relative">
+                <div class="flex justify-between items-start mb-8">
+                    <div>
+                        <p class="text-xs font-bold text-purple-400 uppercase tracking-tighter">Current Stake</p>
+                        <div id="m-pts" class="text-4xl font-black text-white">0</div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-purple-400 uppercase tracking-tighter">Time Remaining</p>
+                        <div id="m-timer" class="text-4xl font-black tabular-nums text-white">0s</div>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 rounded-2xl p-6 mb-8 border border-white/10">
+                    <p class="text-xs text-purple-300 uppercase font-bold mb-2 opacity-60">Active Question</p>
+                    <p id="m-que" class="text-xl font-medium leading-relaxed text-white"></p>
+                </div>
                 
-                <button onclick="resetSystem()" class="mt-6 w-full bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-xl font-bold transition shadow-lg active:scale-95">
-                    RESET MONITOR & CLOSE
-                </button>
+                <div id="answer-box" class="mb-8 hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4">
+                        <p class="text-[10px] text-emerald-400 uppercase tracking-[0.2em] font-bold mb-1">Verified Answer</p>
+                        <p id="m-ans" class="text-2xl font-bold text-emerald-400 uppercase"></p>
+                    </div>
+                    
+                    <button onclick="resetSystem()" class="mt-6 w-full py-4 rounded-xl font-bold transition glass hover:bg-red-500/20 text-red-400 border-red-500/20">
+                        RESET & CLOSE SESSION
+                    </button>
+                </div>
+                
+                <div id="control-btns" class="space-y-3">
+                    <button id="pushBtn" onclick="pushToLive()" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-purple-900/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        🚀 PUSH TO MONITOR
+                    </button>
+                    
+                    <button id="revealBtn" onclick="revealAnswer()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 py-4 rounded-xl font-bold transition-all hidden shadow-xl shadow-amber-900/20">
+                        REVEAL CORRECT ANSWER
+                    </button>
+                    
+                    <button onclick="closeModal()" class="w-full py-3 text-slate-400 hover:text-white transition text-sm font-semibold">
+                        Cancel & Return
+                    </button>
+                </div>
             </div>
-            
-            <button id="pushBtn" onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 transition-all active:scale-95">DISPLAY TO MONITOR</button>
-            
-            <button id="revealBtn" onclick="revealAnswer()" class="w-full mt-2 bg-yellow-500 text-slate-900 py-4 rounded-xl font-bold shadow-lg hover:bg-yellow-400 transition-all hidden animate-bounce">SHOW CORRECT ANSWER</button>
-            
-            <button onclick="closeModal()" class="mt-6 text-slate-400 hover:text-red-600 font-bold uppercase tracking-widest text-xs block w-full border-t pt-4">Close Control</button>
         </div>
     </div>
 
@@ -44,6 +117,9 @@
         let activeQ = null;
         let countdownInterval = null;
         let timeLeft = 0;
+        
+        // Track played questions using LocalStorage
+        let playedQuestions = JSON.parse(localStorage.getItem('playedBibleQuiz')) || [];
 
         const questions = [
             { id: 1, p: 50, q: "Who was swallowed by a great fish?", ans: "Jonah", t: 10 },
@@ -68,35 +144,54 @@
             { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", ans: "Levi", t: 10 }
         ];
 
-        const grid = document.getElementById('grid');
-        questions.forEach(item => {
-            const btn = document.createElement('div');
-            btn.className = "bg-slate-800 border-2 border-yellow-700/30 p-6 rounded-xl cursor-pointer hover:border-yellow-400 hover:bg-slate-700 transition text-center font-bold text-yellow-500 shadow-lg";
-            btn.innerHTML = `<span class="text-3xl">💼</span><br>Box ${item.id}`;
-            btn.onclick = () => {
-                activeQ = item;
-                timeLeft = item.t;
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            questions.forEach(item => {
+                const isPlayed = playedQuestions.includes(item.id);
+                const btn = document.createElement('div');
+                btn.id = `box-${item.id}`;
+                btn.className = `glass-card p-8 rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
                 
-                document.getElementById('m-timer').innerText = timeLeft + "s";
-                document.getElementById('m-timer').classList.remove('animate-pulse', 'text-slate-400');
-                document.getElementById('m-timer').classList.add('text-red-600');
-                document.getElementById('m-pts').innerText = item.p;
-                document.getElementById('m-que').innerText = item.q;
-                document.getElementById('m-ans').innerText = item.ans;
-                
-                document.getElementById('answer-box').classList.add('hidden');
-                document.getElementById('revealBtn').classList.add('hidden');
-                document.getElementById('pushBtn').classList.remove('hidden');
-                
-                document.getElementById('modal').classList.remove('hidden');
-                clearInterval(countdownInterval);
-            };
-            grid.appendChild(btn);
-        });
+                btn.innerHTML = `
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <span class="text-2xl">${isPlayed ? '✔️' : '💼'}</span>
+                    </div>
+                    <div class="text-xs font-bold text-purple-400 tracking-widest uppercase">Box ${item.id}</div>
+                    <div class="text-xl font-extrabold text-white mt-1">${isPlayed ? 'DONE' : item.p}</div>
+                `;
+
+                btn.onclick = () => {
+                    if (playedQuestions.includes(item.id)) {
+                        if(!confirm("This box was already played. Open it again?")) return;
+                    }
+                    openQuestion(item);
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function openQuestion(item) {
+            activeQ = item;
+            timeLeft = item.t;
+            
+            document.getElementById('m-timer').innerText = timeLeft + "s";
+            document.getElementById('m-timer').className = 'text-4xl font-black tabular-nums text-white';
+            document.getElementById('m-pts').innerText = item.p;
+            document.getElementById('m-que').innerText = item.q;
+            document.getElementById('m-ans').innerText = item.ans;
+            
+            document.getElementById('answer-box').classList.add('hidden');
+            document.getElementById('revealBtn').classList.add('hidden');
+            document.getElementById('pushBtn').classList.remove('hidden');
+            
+            document.getElementById('modal').classList.remove('hidden');
+            clearInterval(countdownInterval);
+        }
 
         async function pushToLive() {
             const btn = document.getElementById('pushBtn');
-            btn.innerText = "PUSHING..."; btn.disabled = true;
+            btn.innerHTML = "<span>⏳ SENDING...</span>"; btn.disabled = true;
             
             await fetch(SCRIPT_URL, {
                 method: "POST", 
@@ -111,23 +206,31 @@
                 })
             });
             
-            btn.innerText = "LIVE ON MONITOR ✅";
-            btn.classList.replace('bg-green-600', 'bg-blue-600');
+            // Mark as played
+            if (!playedQuestions.includes(activeQ.id)) {
+                playedQuestions.push(activeQ.id);
+                localStorage.setItem('playedBibleQuiz', JSON.stringify(playedQuestions));
+                renderGrid(); // Refresh visual state
+            }
+
+            btn.innerHTML = "<span>✅ BROADCASTING</span>";
+            btn.classList.replace('bg-purple-600', 'bg-blue-600');
             startTimer();
         }
 
+        // Timer, Reveal, Reset functions... (Keep previous logic)
         function startTimer() {
             clearInterval(countdownInterval);
+            const timerEl = document.getElementById('m-timer');
             countdownInterval = setInterval(() => {
                 if (timeLeft > 0) {
                     timeLeft--;
-                    document.getElementById('m-timer').innerText = timeLeft + "s";
-                    if (timeLeft <= 5) document.getElementById('m-timer').classList.add('animate-pulse');
+                    timerEl.innerText = timeLeft + "s";
+                    if (timeLeft <= 5) timerEl.classList.add('text-red-500', 'animate-pulse');
                 } else {
                     clearInterval(countdownInterval);
-                    document.getElementById('m-timer').innerText = "TIME UP!";
-                    document.getElementById('m-timer').classList.replace('text-red-600', 'text-slate-400');
-                    
+                    timerEl.innerText = "TIME'S UP";
+                    timerEl.classList.replace('text-red-500', 'text-slate-500');
                     document.getElementById('revealBtn').classList.remove('hidden');
                     document.getElementById('pushBtn').classList.add('hidden');
                 }
@@ -137,28 +240,20 @@
         async function revealAnswer() {
             document.getElementById('answer-box').classList.remove('hidden');
             document.getElementById('revealBtn').classList.add('hidden');
-
             await fetch(SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
-                body: JSON.stringify({ 
-                    action: "revealAnswer", 
-                    reveal: true 
-                })
+                body: JSON.stringify({ action: "revealAnswer", reveal: true })
             });
         }
 
         async function resetSystem() {
-            if(!confirm("Clear Monitor and prepare for next box?")) return;
-            
-            // Send reset to Sheet
+            if(!confirm("Are you sure? This will clear the live display.")) return;
             await fetch(SCRIPT_URL, { 
                 method: "POST", 
                 mode: "no-cors", 
                 body: JSON.stringify({ action: "reset" }) 
             });
-
-            // Automatically close the modal after reset
             closeModal();
         }
 
@@ -166,11 +261,21 @@
             document.getElementById('modal').classList.add('hidden'); 
             clearInterval(countdownInterval);
             const btn = document.getElementById('pushBtn');
-            btn.classList.remove('bg-blue-600');
-            btn.classList.add('bg-green-600');
-            btn.innerText = "DISPLAY TO MONITOR";
+            btn.className = "w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-purple-900/20 transition-all active:scale-95 flex items-center justify-center gap-2";
+            btn.innerHTML = "🚀 PUSH TO MONITOR";
             btn.disabled = false;
         }
+
+        function clearHistory() {
+            if(confirm("Reset all boxes and clear history?")) {
+                playedQuestions = [];
+                localStorage.removeItem('playedBibleQuiz');
+                renderGrid();
+            }
+        }
+
+        // Initialize grid on load
+        renderGrid();
     </script>
 </body>
 </html>
