@@ -2,69 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Control Panel - Bible Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Score Control - Bible Quiz Pro</title>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #2e1065, #0f172a);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card {
+            background: rgba(88, 28, 135, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(167, 139, 250, 0.15);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #c084fc, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen p-8 font-sans">
+<body class="text-slate-200 p-4 md:p-12">
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-end mb-12 border-b border-slate-700 pb-6">
-            <div>
-                <h1 class="text-4xl font-black text-yellow-500 tracking-tight">SCORE CONTROL</h1>
-                <p class="text-slate-400 font-mono text-sm uppercase tracking-widest mt-1">Live Monitor Sync Active</p>
-            </div>
-            <div class="text-right">
-                <div class="flex items-center gap-2 justify-end mb-2">
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-6">
+            <div class="text-center sm:text-left">
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gradient">Score Central</h1>
+                <div class="flex items-center justify-center sm:justify-start gap-2 mt-2">
                     <div id="sync-indicator" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <p id="status-text" class="text-xs font-bold text-slate-500 uppercase">Synced with Sheet</p>
+                    <p id="status-text" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Synced</p>
                 </div>
-                <button onclick="fetchLatestFromSheet()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-full border border-slate-600 transition text-sm font-bold active:scale-95">
-                    FORCE REFRESH
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-3">
+                <button onclick="resetAllScores()" class="glass px-5 py-2 rounded-xl text-xs font-bold text-red-400 hover:bg-red-500/10 transition border-red-500/20 uppercase tracking-tighter">
+                    Reset All Scores
+                </button>
+                <button onclick="fetchLatestFromSheet()" class="glass px-5 py-2 rounded-xl text-xs font-bold text-purple-300 hover:bg-purple-500/20 transition uppercase tracking-tighter">
+                    Force Refresh
                 </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             
-            <div class="bg-slate-800 rounded-3xl p-6 border-2 border-slate-700 shadow-xl text-center transition-all hover:border-yellow-500">
-                <h2 class="text-xl font-black text-slate-400 mb-4 uppercase tracking-tighter">Team 1</h2>
-                <div id="score-TEAM 1" class="text-7xl font-black text-white mb-6">0</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="pushUpdate('TEAM 1', 10)" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-black shadow-lg transition-all active:scale-90">+10</button>
-                    <button onclick="pushUpdate('TEAM 1', -10)" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-xl font-black transition-all active:scale-90">-10</button>
-                    <button onclick="pushUpdate('TEAM 1', 50)" class="col-span-2 bg-yellow-500 hover:bg-yellow-400 text-slate-900 py-3 rounded-xl font-black shadow-lg transition-all active:scale-95">BONUS +50</button>
-                </div>
-            </div>
+            <script>
+                const teams = ["TEAM 1", "TEAM 2", "TEAM 3", "TEAM 4"];
+                teams.forEach(team => {
+                    document.write(`
+                    <div class="glass-card rounded-[2.5rem] p-6 md:p-8 text-center relative overflow-hidden group">
+                        <div class="absolute -top-10 -left-10 w-24 h-24 bg-purple-600/5 blur-2xl rounded-full"></div>
+                        
+                        <h2 class="text-sm font-bold text-purple-400 mb-2 uppercase tracking-widest opacity-80">${team}</h2>
+                        <div id="score-${team}" class="text-6xl md:text-7xl font-black text-white mb-8 tracking-tighter tabular-nums">0</div>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <button onclick="pushUpdate('${team}', 10)" class="bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl font-black transition-all active:scale-90 shadow-lg shadow-emerald-900/20">+10</button>
+                            <button onclick="pushUpdate('${team}', -10)" class="glass hover:bg-white/5 text-slate-300 py-4 rounded-2xl font-black transition-all active:scale-90">-10</button>
+                        </div>
+                        
+                        <button onclick="pushUpdate('${team}', 50)" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-purple-900/20 transition-all active:scale-95 mb-6">
+                            BONUS +50
+                        </button>
 
-            <div class="bg-slate-800 rounded-3xl p-6 border-2 border-slate-700 shadow-xl text-center transition-all hover:border-yellow-500">
-                <h2 class="text-xl font-black text-slate-400 mb-4 uppercase tracking-tighter">Team 2</h2>
-                <div id="score-TEAM 2" class="text-7xl font-black text-white mb-6">0</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="pushUpdate('TEAM 2', 10)" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-black shadow-lg transition-all active:scale-90">+10</button>
-                    <button onclick="pushUpdate('TEAM 2', -10)" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-xl font-black transition-all active:scale-90">-10</button>
-                    <button onclick="pushUpdate('TEAM 2', 50)" class="col-span-2 bg-yellow-500 hover:bg-yellow-400 text-slate-900 py-3 rounded-xl font-black shadow-lg transition-all active:scale-95">BONUS +50</button>
-                </div>
-            </div>
-
-            <div class="bg-slate-800 rounded-3xl p-6 border-2 border-slate-700 shadow-xl text-center transition-all hover:border-yellow-500">
-                <h2 class="text-xl font-black text-slate-400 mb-4 uppercase tracking-tighter">Team 3</h2>
-                <div id="score-TEAM 3" class="text-7xl font-black text-white mb-6">0</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="pushUpdate('TEAM 3', 10)" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-black shadow-lg transition-all active:scale-90">+10</button>
-                    <button onclick="pushUpdate('TEAM 3', -10)" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-xl font-black transition-all active:scale-90">-10</button>
-                    <button onclick="pushUpdate('TEAM 3', 50)" class="col-span-2 bg-yellow-500 hover:bg-yellow-400 text-slate-900 py-3 rounded-xl font-black shadow-lg transition-all active:scale-95">BONUS +50</button>
-                </div>
-            </div>
-
-            <div class="bg-slate-800 rounded-3xl p-6 border-2 border-slate-700 shadow-xl text-center transition-all hover:border-yellow-500">
-                <h2 class="text-xl font-black text-slate-400 mb-4 uppercase tracking-tighter">Team 4</h2>
-                <div id="score-TEAM 4" class="text-7xl font-black text-white mb-6">0</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="pushUpdate('TEAM 4', 10)" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-black shadow-lg transition-all active:scale-90">+10</button>
-                    <button onclick="pushUpdate('TEAM 4', -10)" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-xl font-black transition-all active:scale-90">-10</button>
-                    <button onclick="pushUpdate('TEAM 4', 50)" class="col-span-2 bg-yellow-500 hover:bg-yellow-400 text-slate-900 py-3 rounded-xl font-black shadow-lg transition-all active:scale-95">BONUS +50</button>
-                </div>
-            </div>
+                        <button onclick="resetIndividualScore('${team}')" class="text-[10px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest transition">
+                            Reset Team
+                        </button>
+                    </div>
+                    `);
+                });
+            </script>
 
         </div>
     </div>
@@ -72,22 +87,19 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwF9VR8YQ2UehcXHf-tZWaZDI0HdCCLF4r-x1s5fzH-D8qaVJPj6v21rr7HMViu6hNK/exec"; 
 
-        // Initial Load and Auto-Polling (keeps UI synced with monitor)
         window.onload = () => {
             fetchLatestFromSheet();
-            setInterval(fetchLatestFromSheet, 5000); // Polling every 5 seconds
+            setInterval(fetchLatestFromSheet, 5000);
         };
 
         async function fetchLatestFromSheet() {
             try {
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
-                
                 data.players.forEach(p => {
                     const el = document.getElementById(`score-${p.name}`);
                     if (el) el.innerText = p.score;
                 });
-                
                 updateStatus("Synced", "bg-green-500");
             } catch (e) {
                 updateStatus("Offline", "bg-red-500");
@@ -95,14 +107,15 @@
         }
 
         async function pushUpdate(teamName, points) {
-            // Update UI immediately (Optimistic)
             const el = document.getElementById(`score-${teamName}`);
-            el.innerText = parseInt(el.innerText) + points;
+            const currentScore = parseInt(el.innerText);
+            const newScore = currentScore + points;
             
+            // Optimistic UI update
+            el.innerText = newScore;
             updateStatus("Updating...", "bg-yellow-500");
 
             try {
-                // Send post to update the actual sheet
                 await fetch(SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors",
@@ -114,9 +127,42 @@
                 });
                 updateStatus("Synced", "bg-green-500");
             } catch (e) {
-                alert("Error pushing score. Refreshing...");
+                updateStatus("Error", "bg-red-500");
                 fetchLatestFromSheet();
             }
+        }
+
+        async function resetIndividualScore(teamName) {
+            if(!confirm(`Reset ${teamName} to 0?`)) return;
+            
+            const el = document.getElementById(`score-${teamName}`);
+            const currentScore = parseInt(el.innerText);
+            // To reset to zero, we push the negative of the current score
+            await pushUpdate(teamName, -currentScore);
+        }
+
+        async function resetAllScores() {
+            if(!confirm("DANGER: Reset all team scores to zero?")) return;
+            
+            updateStatus("Resetting...", "bg-red-500");
+            
+            // Loops through teams and sends reset commands
+            for (const team of ["TEAM 1", "TEAM 2", "TEAM 3", "TEAM 4"]) {
+                const el = document.getElementById(`score-${team}`);
+                const currentScore = parseInt(el.innerText);
+                if (currentScore !== 0) {
+                    await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        mode: "no-cors",
+                        body: JSON.stringify({
+                            action: "submitScore",
+                            user: team,
+                            points: -currentScore
+                        })
+                    });
+                }
+            }
+            fetchLatestFromSheet();
         }
 
         function updateStatus(text, colorClass) {
