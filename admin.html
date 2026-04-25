@@ -12,29 +12,37 @@
             background: radial-gradient(circle at top left, #2e1065, #0f172a);
             min-height: 100vh;
         }
+        /* Glass effect for modal and specific elements */
         .glass {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.08); /* Lighter than before */
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
+        /* The main grid containers - Lighter and more visible */
         .glass-card {
-            background: rgba(88, 28, 135, 0.15);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(167, 139, 250, 0.2);
+            background: rgba(255, 255, 255, 0.07); /* Lighter neutral base */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        /* Purple tint for the briefcase cards */
+        .card-purple {
+            background: rgba(167, 139, 250, 0.12); /* Light purple tint */
+            border-color: rgba(167, 139, 250, 0.25);
+        }
         .glass-card:not(.spent):hover {
-            background: rgba(139, 92, 246, 0.25);
+            background: rgba(167, 139, 250, 0.22);
             border-color: rgba(167, 139, 250, 0.5);
             transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
-        /* Style for played boxes */
         .glass-card.spent {
-            opacity: 0.4;
-            filter: grayscale(0.8);
+            opacity: 0.3;
+            filter: grayscale(1);
             cursor: default;
+            background: rgba(255, 255, 255, 0.02);
             border-color: rgba(255, 255, 255, 0.05);
         }
         .text-gradient {
@@ -53,7 +61,7 @@
                 <p class="text-slate-400 text-sm mt-1 uppercase tracking-widest">Master Administrator Console</p>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="clearHistory()" class="text-[10px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest transition">Clear History</button>
+                <button onclick="clearHistory()" class="text-[10px] font-bold text-slate-400 hover:text-red-400 uppercase tracking-widest transition">Clear History</button>
                 <div class="px-4 py-2 rounded-full glass text-xs font-semibold flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> SYSTEM LIVE
                 </div>
@@ -63,31 +71,31 @@
         <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+    <div id="modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
         <div class="glass border-purple-500/30 p-8 rounded-3xl max-w-lg w-full shadow-2xl relative overflow-hidden">
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-purple-600/20 blur-3xl rounded-full"></div>
             
             <div class="relative">
                 <div class="flex justify-between items-start mb-8">
                     <div>
-                        <p class="text-xs font-bold text-purple-400 uppercase tracking-tighter">Current Stake</p>
+                        <p class="text-xs font-bold text-purple-300 uppercase tracking-tighter">Current Stake</p>
                         <div id="m-pts" class="text-4xl font-black text-white">0</div>
                     </div>
                     <div class="text-right">
-                        <p class="text-xs font-bold text-purple-400 uppercase tracking-tighter">Time Remaining</p>
+                        <p class="text-xs font-bold text-purple-300 uppercase tracking-tighter">Time Remaining</p>
                         <div id="m-timer" class="text-4xl font-black tabular-nums text-white">0s</div>
                     </div>
                 </div>
 
-                <div class="bg-white/5 rounded-2xl p-6 mb-8 border border-white/10">
-                    <p class="text-xs text-purple-300 uppercase font-bold mb-2 opacity-60">Active Question</p>
+                <div class="bg-white/10 rounded-2xl p-6 mb-8 border border-white/10">
+                    <p class="text-xs text-purple-300 uppercase font-bold mb-2 opacity-80">Active Question</p>
                     <p id="m-que" class="text-xl font-medium leading-relaxed text-white"></p>
                 </div>
                 
                 <div id="answer-box" class="mb-8 hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4">
+                    <div class="bg-emerald-500/20 border border-emerald-500/30 rounded-2xl p-4">
                         <p class="text-[10px] text-emerald-400 uppercase tracking-[0.2em] font-bold mb-1">Verified Answer</p>
-                        <p id="m-ans" class="text-2xl font-bold text-emerald-400 uppercase"></p>
+                        <p id="m-ans" class="text-2xl font-bold text-emerald-300 uppercase"></p>
                     </div>
                     
                     <button onclick="resetSystem()" class="mt-6 w-full py-4 rounded-xl font-bold transition glass hover:bg-red-500/20 text-red-400 border-red-500/20">
@@ -117,8 +125,6 @@
         let activeQ = null;
         let countdownInterval = null;
         let timeLeft = 0;
-        
-        // Track played questions using LocalStorage
         let playedQuestions = JSON.parse(localStorage.getItem('playedBibleQuiz')) || [];
 
         const questions = [
@@ -151,19 +157,19 @@
                 const isPlayed = playedQuestions.includes(item.id);
                 const btn = document.createElement('div');
                 btn.id = `box-${item.id}`;
-                btn.className = `glass-card p-8 rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
+                btn.className = `glass-card card-purple p-8 rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
                 
                 btn.innerHTML = `
-                    <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                         <span class="text-2xl">${isPlayed ? '✔️' : '💼'}</span>
                     </div>
-                    <div class="text-xs font-bold text-purple-400 tracking-widest uppercase">Box ${item.id}</div>
+                    <div class="text-[10px] font-bold text-purple-300 tracking-widest uppercase">Box ${item.id}</div>
                     <div class="text-xl font-extrabold text-white mt-1">${isPlayed ? 'DONE' : item.p}</div>
                 `;
 
                 btn.onclick = () => {
                     if (playedQuestions.includes(item.id)) {
-                        if(!confirm("This box was already played. Open it again?")) return;
+                        if(!confirm("Open this box again?")) return;
                     }
                     openQuestion(item);
                 };
@@ -171,20 +177,18 @@
             });
         }
 
+        // ... Logic for openQuestion, pushToLive, revealAnswer, resetSystem, etc remain same as your provided code
         function openQuestion(item) {
             activeQ = item;
             timeLeft = item.t;
-            
             document.getElementById('m-timer').innerText = timeLeft + "s";
             document.getElementById('m-timer').className = 'text-4xl font-black tabular-nums text-white';
             document.getElementById('m-pts').innerText = item.p;
             document.getElementById('m-que').innerText = item.q;
             document.getElementById('m-ans').innerText = item.ans;
-            
             document.getElementById('answer-box').classList.add('hidden');
             document.getElementById('revealBtn').classList.add('hidden');
             document.getElementById('pushBtn').classList.remove('hidden');
-            
             document.getElementById('modal').classList.remove('hidden');
             clearInterval(countdownInterval);
         }
@@ -192,33 +196,20 @@
         async function pushToLive() {
             const btn = document.getElementById('pushBtn');
             btn.innerHTML = "<span>⏳ SENDING...</span>"; btn.disabled = true;
-            
             await fetch(SCRIPT_URL, {
-                method: "POST", 
-                mode: "no-cors",
-                body: JSON.stringify({ 
-                    action: "pushQuestion", 
-                    q: activeQ.q, 
-                    p: activeQ.p, 
-                    t: activeQ.t, 
-                    ans: activeQ.ans,
-                    reveal: false 
-                })
+                method: "POST", mode: "no-cors",
+                body: JSON.stringify({ action: "pushQuestion", q: activeQ.q, p: activeQ.p, t: activeQ.t, ans: activeQ.ans, reveal: false })
             });
-            
-            // Mark as played
             if (!playedQuestions.includes(activeQ.id)) {
                 playedQuestions.push(activeQ.id);
                 localStorage.setItem('playedBibleQuiz', JSON.stringify(playedQuestions));
-                renderGrid(); // Refresh visual state
+                renderGrid();
             }
-
             btn.innerHTML = "<span>✅ BROADCASTING</span>";
             btn.classList.replace('bg-purple-600', 'bg-blue-600');
             startTimer();
         }
 
-        // Timer, Reveal, Reset functions... (Keep previous logic)
         function startTimer() {
             clearInterval(countdownInterval);
             const timerEl = document.getElementById('m-timer');
@@ -240,20 +231,12 @@
         async function revealAnswer() {
             document.getElementById('answer-box').classList.remove('hidden');
             document.getElementById('revealBtn').classList.add('hidden');
-            await fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify({ action: "revealAnswer", reveal: true })
-            });
+            await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "revealAnswer", reveal: true }) });
         }
 
         async function resetSystem() {
-            if(!confirm("Are you sure? This will clear the live display.")) return;
-            await fetch(SCRIPT_URL, { 
-                method: "POST", 
-                mode: "no-cors", 
-                body: JSON.stringify({ action: "reset" }) 
-            });
+            if(!confirm("Clear live display?")) return;
+            await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "reset" }) });
             closeModal();
         }
 
@@ -267,14 +250,13 @@
         }
 
         function clearHistory() {
-            if(confirm("Reset all boxes and clear history?")) {
+            if(confirm("Reset all boxes?")) {
                 playedQuestions = [];
                 localStorage.removeItem('playedBibleQuiz');
                 renderGrid();
             }
         }
 
-        // Initialize grid on load
         renderGrid();
     </script>
 </body>
