@@ -36,10 +36,10 @@
                 0 POINTS
             </div>
 
-            <div id="mon-ans-container" class="absolute inset-0 bg-black/40 backdrop-blur-md hidden flex-col items-center justify-center text-center p-6 rounded-3xl border-4 border-green-500 reveal-anim">
+            <div id="mon-ans-container" class="absolute inset-0 bg-black/60 backdrop-blur-md hidden flex-col items-center justify-center text-center p-6 rounded-3xl border-4 border-green-500 reveal-anim z-10">
                 <span class="text-green-500 font-black tracking-widest uppercase text-2xl mb-4">Correct Answer</span>
-                <div id="mon-ans-text" class="text-8xl font-black text-white drop-shadow-[0_0_30px_rgba(34,197,94,0.6)]">
-                    JONAH
+                <div id="mon-ans-text" class="text-8xl font-black text-white drop-shadow-[0_0_30px_rgba(34,197,94,0.6)] uppercase">
+                    ---
                 </div>
             </div>
         </div>
@@ -57,6 +57,7 @@
 
         async function sync() {
             try {
+                // cache-buster cb added to ensure fresh data from Google Script
                 const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
                 
@@ -74,21 +75,27 @@
                     qEl.classList.remove('text-slate-700');
                     qEl.classList.add('text-white');
 
-                    // REVEAL LOGIC: Check if the admin has triggered the answer
+                    // REVEAL LOGIC: Checks the 'reveal' property from your Spreadsheet
+                    // Handles both boolean true and string "true"
                     if(data.reveal === true || data.reveal === "true") {
-                        ansText.innerText = data.answer; // Assumes your sheet column is 'answer'
+                        ansText.innerText = data.answer;
                         ansContainer.classList.remove('hidden');
                         ansContainer.classList.add('flex');
                     } else {
+                        // Keep hidden if reveal is false
                         ansContainer.classList.add('hidden');
                         ansContainer.classList.remove('flex');
                     }
                 } else {
+                    // RESET STATE (When Admin resets or no active question)
                     qEl.innerText = "Ready for the next Box...";
                     qEl.classList.remove('text-white');
                     qEl.classList.add('text-slate-700');
                     pEl.classList.add('hidden');
+                    
+                    // Force hide answer container on reset
                     ansContainer.classList.add('hidden');
+                    ansContainer.classList.remove('flex');
                 }
 
                 // 2. UPDATE LEADERBOARD
@@ -114,6 +121,7 @@
             }
         }
 
+        // Poll every 2.5 seconds
         setInterval(sync, 2500);
         sync();
     </script>
