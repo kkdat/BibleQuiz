@@ -5,51 +5,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Monitor - Bible Quiz</title>
 </head>
-<body class="bg-black text-white p-12 overflow-hidden font-sans">
+<body class="bg-black text-white p-12 overflow-hidden">
     <div class="grid grid-cols-12 gap-12 h-[80vh] items-center">
         <div class="col-span-8 flex flex-col justify-center pr-10 border-r-4 border-slate-900">
-            <h1 class="text-yellow-500 uppercase tracking-[0.3em] font-black mb-6 text-2xl">Current Question</h1>
-            <div id="mon-q" class="text-7xl font-black leading-tight text-white drop-shadow-2xl">
-                Ready for Round 1...
-            </div>
-            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500/50 font-bold hidden">0 POINTS</div>
+            <h1 class="text-yellow-500 uppercase tracking-widest font-black mb-6">Current Question</h1>
+            <div id="mon-q" class="text-7xl font-black leading-tight">Waiting for Admin...</div>
+            <div id="mon-pts" class="mt-8 text-4xl text-yellow-500 font-bold hidden">0 POINTS</div>
         </div>
         
-        <div class="col-span-4 flex flex-col h-full">
+        <div class="col-span-4 flex flex-col">
             <h1 class="text-blue-500 uppercase tracking-widest font-black mb-10 text-xl border-b-2 border-blue-900 pb-4">Rankings</h1>
-            <div id="leaderboard" class="space-y-10">
-                <div class="space-y-3">
-                    <div class="flex justify-between font-bold text-2xl"><span>Top Player</span><span>1,250</span></div>
-                    <div class="h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]" style="width: 85%"></div>
-                </div>
+            <div id="leaderboard" class="space-y-6">
+                <p class="text-slate-500 italic">No scores yet...</p>
             </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRst4vC09rgL3kH7HGqpxMPfha8t-mMsObfOTL3O4SH5PyBrQKunrjtdj-r7gQt7fs/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxozOjSYAFFeLAdDkN7eriwoJ1EW1ylILNKGDDq1xplomnwWNmwTRm419d5sd6djoKB/exec";
 
         async function sync() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?v=${Math.random()}`);
+                const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
                 const data = await res.json();
-                const qEl = document.getElementById('mon-q');
-                const pEl = document.getElementById('mon-pts');
-
                 if(data.status === "ACTIVE") {
-                    qEl.innerText = data.question;
-                    pEl.innerText = data.points + " POINTS";
-                    pEl.classList.remove('hidden');
-                    qEl.classList.add('text-white');
+                    document.getElementById('mon-q').innerText = data.question;
+                    document.getElementById('mon-pts').innerText = data.points + " POINTS";
+                    document.getElementById('mon-pts').classList.remove('hidden');
                 } else {
-                    qEl.innerText = "OPEN A BRIEFCASE...";
-                    qEl.classList.remove('text-white');
-                    qEl.classList.add('text-slate-700');
-                    pEl.classList.add('hidden');
+                    document.getElementById('mon-q').innerText = "Ready for the next Box...";
+                    document.getElementById('mon-pts').classList.add('hidden');
                 }
             } catch(e) {}
         }
-
         setInterval(sync, 2500);
     </script>
 </body>
