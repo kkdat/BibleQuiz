@@ -17,13 +17,20 @@
 
     <div id="modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl border-4 border-yellow-500">
+            
             <div id="m-timer" class="text-6xl font-black text-red-600 mb-4 tabular-nums">0s</div>
             
             <div id="m-pts" class="text-4xl font-black text-yellow-600 mb-2 underline">0</div>
             <p id="m-que" class="text-xl font-bold mb-6 italic leading-tight"></p>
-            <p class="text-xs text-slate-400 uppercase tracking-widest mb-6">Correct Answer: <span id="m-ans" class="text-green-600 font-bold"></span></p>
+            
+            <div id="answer-box" class="mb-6 hidden">
+                <p class="text-xs text-slate-400 uppercase tracking-widest">Correct Answer:</p>
+                <p id="m-ans" class="text-2xl font-black text-green-600 uppercase"></p>
+            </div>
             
             <button id="pushBtn" onclick="pushToLive()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 transition-all active:scale-95">DISPLAY TO MONITOR</button>
+            
+            <button id="revealBtn" onclick="revealAnswer()" class="w-full mt-2 bg-yellow-500 text-slate-900 py-4 rounded-xl font-bold shadow-lg hover:bg-yellow-400 transition-all hidden animate-bounce">SHOW CORRECT ANSWER</button>
             
             <button onclick="closeModal()" class="mt-6 text-slate-400 hover:text-red-600 font-bold uppercase tracking-widest text-xs block w-full border-t pt-4">Close Control</button>
         </div>
@@ -66,15 +73,21 @@
             btn.onclick = () => {
                 activeQ = item;
                 timeLeft = item.t;
-                // Reset UI
+                
+                // Reset Modal UI
                 document.getElementById('m-timer').innerText = timeLeft + "s";
-                document.getElementById('m-timer').classList.remove('animate-pulse');
+                document.getElementById('m-timer').classList.remove('animate-pulse', 'text-slate-400');
+                document.getElementById('m-timer').classList.add('text-red-600');
                 document.getElementById('m-pts').innerText = item.p;
                 document.getElementById('m-que').innerText = item.q;
                 document.getElementById('m-ans').innerText = item.ans;
-                document.getElementById('modal').classList.remove('hidden');
                 
-                // Clear any previous interval just in case
+                // Hide Answer & Reveal Button
+                document.getElementById('answer-box').classList.add('hidden');
+                document.getElementById('revealBtn').classList.add('hidden');
+                document.getElementById('pushBtn').classList.remove('hidden');
+                
+                document.getElementById('modal').classList.remove('hidden');
                 clearInterval(countdownInterval);
             };
             grid.appendChild(btn);
@@ -89,18 +102,12 @@
                 mode: "no-cors",
                 body: JSON.stringify({ 
                     action: "pushQuestion", 
-                    q: activeQ.q, 
-                    p: activeQ.p, 
-                    c: activeQ.c, 
-                    t: activeQ.t,
-                    ans: activeQ.ans 
+                    q: activeQ.q, p: activeQ.p, c: activeQ.c, t: activeQ.t, ans: activeQ.ans 
                 })
             });
             
-            btn.innerText = "DISPLAYED ✅";
+            btn.innerText = "LIVE ON MONITOR ✅";
             btn.classList.replace('bg-green-600', 'bg-blue-600');
-
-            // START TIMER ONLY AFTER PUSH
             startTimer();
         }
 
@@ -114,8 +121,18 @@
                 } else {
                     clearInterval(countdownInterval);
                     document.getElementById('m-timer').innerText = "TIME UP!";
+                    document.getElementById('m-timer').classList.replace('text-red-600', 'text-slate-400');
+                    
+                    // Show the Reveal Button
+                    document.getElementById('revealBtn').classList.remove('hidden');
+                    document.getElementById('pushBtn').classList.add('hidden');
                 }
             }, 1000);
+        }
+
+        function revealAnswer() {
+            document.getElementById('answer-box').classList.remove('hidden');
+            document.getElementById('revealBtn').classList.add('hidden');
         }
 
         async function resetSystem() {
@@ -127,7 +144,6 @@
         function closeModal() { 
             document.getElementById('modal').classList.add('hidden'); 
             clearInterval(countdownInterval);
-            // Reset button color for next box
             const btn = document.getElementById('pushBtn');
             btn.classList.replace('bg-blue-600', 'bg-green-600');
             btn.innerText = "DISPLAY TO MONITOR";
