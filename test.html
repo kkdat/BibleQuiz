@@ -27,13 +27,14 @@
         .option-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-btn:hover {
+            background: rgba(167, 139, 250, 0.15);
+            border-color: rgba(167, 139, 250, 0.5);
+            transform: translateX(4px);
         }
         .option-btn:active { transform: scale(0.98); }
-        .option-btn.selected {
-            background: rgba(167, 139, 250, 0.3);
-            border-color: #a78bfa;
-        }
     </style>
 </head>
 <body class="flex items-center justify-center p-4">
@@ -41,7 +42,7 @@
     <div id="login-screen" class="max-w-md w-full">
         <div class="text-center mb-8">
             <h1 class="text-4xl font-extrabold text-gradient">Join the Quiz</h1>
-            <p class="text-slate-400 mt-2">Enter your credentials to enter the arena</p>
+            <p class="text-slate-400 mt-2">Enter credentials to join the arena</p>
         </div>
         <div class="glass p-8 rounded-3xl space-y-4">
             <div>
@@ -57,14 +58,14 @@
     </div>
 
     <div id="main-interface" class="hidden max-w-2xl w-full">
-        <header class="flex justify-between items-center mb-8 glass px-6 py-3 rounded-2xl">
+        <header class="flex justify-between items-center mb-6 glass px-6 py-3 rounded-2xl">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center font-bold text-xs" id="user-initial">?</div>
                 <span id="display-name" class="font-bold text-sm">Player</span>
             </div>
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Connected</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live</span>
             </div>
         </header>
 
@@ -72,29 +73,25 @@
             <div class="inline-block p-6 rounded-full bg-purple-500/10 mb-6">
                 <span class="text-6xl animate-bounce inline-block">⏳</span>
             </div>
-            <h2 class="text-3xl font-black mb-2">Waiting for Admin...</h2>
-            <p class="text-slate-400">The next briefcase is about to be opened.</p>
+            <h2 class="text-3xl font-black mb-2">Ready to Play?</h2>
+            <p class="text-slate-400">Waiting for Admin to open a briefcase...</p>
         </div>
 
         <div id="quiz-area" class="hidden">
             <div class="glass p-8 rounded-[2.5rem] relative overflow-hidden border-purple-500/20">
                 <div class="flex justify-between items-center mb-6">
-                    <span id="player-points-badge" class="bg-purple-500/20 text-purple-300 text-[10px] font-black px-3 py-1 rounded-full border border-purple-500/30 uppercase tracking-widest">0 Points Stake</span>
-                    <span id="player-timer" class="text-2xl font-black tabular-nums">10s</span>
+                    <span id="player-points-badge" class="bg-purple-500/20 text-purple-300 text-[10px] font-black px-3 py-1 rounded-full border border-purple-500/30 uppercase tracking-widest">0 Points</span>
+                    <span id="player-timer" class="text-2xl font-black tabular-nums text-purple-400">10s</span>
                 </div>
                 
                 <h3 id="player-question" class="text-2xl md:text-3xl font-bold leading-tight mb-8">Loading question...</h3>
 
-                <div id="options-grid" class="grid grid-cols-1 gap-3">
-                    <button onclick="submitAnswer('A')" class="option-btn p-5 rounded-2xl text-left font-bold hover:bg-white/10 flex justify-between items-center group">
-                        <span>Tap to Submit Response</span>
-                        <span class="opacity-0 group-hover:opacity-100 transition">🚀</span>
-                    </button>
-                </div>
+                <div id="options-grid" class="grid grid-cols-1 gap-4">
+                    </div>
 
-                <div id="feedback" class="hidden mt-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-                    <p class="text-emerald-400 font-bold uppercase tracking-widest text-xs">Response Submitted</p>
-                    <p class="text-slate-300 text-sm">Awaiting admin reveal...</p>
+                <div id="feedback" class="hidden mt-6 p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                    <p class="text-emerald-400 font-black uppercase tracking-[0.2em] text-xs mb-1">Answer Locked In</p>
+                    <p class="text-slate-400 text-sm">Watch the main screen for results!</p>
                 </div>
             </div>
         </div>
@@ -102,83 +99,102 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec";
+        
+        // Mocking some possible answers from your admin list to fill the choices
+        const allPossibleAnswers = ["Jonah", "40", "Genesis", "Moses", "Slingshot", "12", "Methuselah", "His hair", "Jericho", "A pillar of fire", "Joseph", "Jesus wept", "Matthew", "Water to wine", "10", "Paul", "Patmos", "Saul", "Nebo", "Levi"];
+
         let currentUser = null;
-        let lastSyncStatus = "INACTIVE";
+        let lastQuestionText = "";
+        let hasSubmitted = false;
 
         function login() {
             const user = document.getElementById('username').value;
             const pass = document.getElementById('passcode').value;
-
-            if (user.length < 2) return alert("Enter a valid name");
-            if (pass !== "1234") return alert("Invalid Passcode"); // Change '1234' to your desired passcode
+            if (user.length < 2) return alert("Enter your name");
+            if (pass !== "1234") return alert("Wrong passcode");
 
             currentUser = user;
             document.getElementById('display-name').innerText = user;
             document.getElementById('user-initial').innerText = user.charAt(0).toUpperCase();
-            
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-interface').classList.remove('hidden');
-
-            startSync();
+            
+            setInterval(sync, 2000);
         }
 
-        async function startSync() {
-            setInterval(async () => {
-                try {
-                    const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
-                    const data = await res.json();
-                    updateUI(data);
-                } catch (e) {
-                    console.error("Sync error");
-                }
-            }, 2000);
-        }
-
-        function updateUI(data) {
-            const waitingRoom = document.getElementById('waiting-room');
-            const quizArea = document.getElementById('quiz-area');
-            const questionEl = document.getElementById('player-question');
-            const timerEl = document.getElementById('player-timer');
-            const pointsEl = document.getElementById('player-points-badge');
-
-            if (data.status === "ACTIVE") {
-                waitingRoom.classList.add('hidden');
-                quizArea.classList.remove('hidden');
-                questionEl.innerText = data.question;
-                pointsEl.innerText = data.points + " Points Stake";
-                timerEl.innerText = data.timeLeft + "s";
+        async function sync() {
+            try {
+                const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
+                const data = await res.json();
                 
-                // Reset feedback if a new question starts
-                if (lastSyncStatus !== "ACTIVE") {
-                    document.getElementById('feedback').classList.add('hidden');
-                    document.querySelector('.option-btn').classList.remove('hidden');
+                if (data.status === "ACTIVE") {
+                    document.getElementById('waiting-room').classList.add('hidden');
+                    document.getElementById('quiz-area').classList.remove('hidden');
+                    
+                    // If it's a new question, generate new option buttons
+                    if (data.question !== lastQuestionText) {
+                        lastQuestionText = data.question;
+                        hasSubmitted = false;
+                        generateOptions(data.correctAnswer);
+                        document.getElementById('feedback').classList.add('hidden');
+                        document.getElementById('options-grid').classList.remove('hidden');
+                    }
+
+                    document.getElementById('player-question').innerText = data.question;
+                    document.getElementById('player-points-badge').innerText = data.points + " Points";
+                    document.getElementById('player-timer').innerText = data.timeLeft + "s";
+                } else {
+                    document.getElementById('waiting-room').classList.remove('hidden');
+                    document.getElementById('quiz-area').classList.add('hidden');
+                    lastQuestionText = "";
                 }
-            } else {
-                waitingRoom.classList.remove('hidden');
-                quizArea.classList.add('hidden');
-            }
-            lastSyncStatus = data.status;
+            } catch (e) { console.log("Sync..."); }
         }
 
-        async function submitAnswer(choice) {
-            // This sends the player's name and answer to the Google Sheet backend
-            // Only the Admin screen will see the results in the "Players" leaderboard/list
-            document.getElementById('feedback').classList.remove('hidden');
-            document.querySelector('.option-btn').classList.add('hidden');
+        function generateOptions(correct) {
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            
+            // Pick 3 random decoys that aren't the correct answer
+            let decoys = allPossibleAnswers.filter(a => a !== correct)
+                         .sort(() => 0.5 - Math.random())
+                         .slice(0, 3);
+            
+            // Combine and shuffle
+            let choices = [...decoys, correct].sort(() => 0.5 - Math.random());
 
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn p-5 rounded-2xl text-left font-bold flex items-center justify-between group";
+                btn.innerHTML = `<span>${choice}</span><span class="opacity-0 group-hover:opacity-100 transition">👉</span>`;
+                btn.onclick = () => submitChoice(choice, correct);
+                grid.appendChild(btn);
+            });
+        }
+
+        async function submitChoice(picked, correct) {
+            if (hasSubmitted) return;
+            hasSubmitted = true;
+
+            const isCorrect = (picked === correct);
+            
+            document.getElementById('options-grid').classList.add('hidden');
+            document.getElementById('feedback').classList.remove('hidden');
+
+            // Send result to Google Sheets
+            // The admin can then see who got it right based on 'isCorrect'
             try {
                 await fetch(SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors",
                     body: JSON.stringify({
-                        action: "submitAnswer",
-                        playerName: currentUser,
-                        answer: "SUBMITTED" // Or choice if you add choices
+                        action: "playerResponse",
+                        player: currentUser,
+                        answer: picked,
+                        isCorrect: isCorrect
                     })
                 });
-            } catch (e) {
-                console.log("Submission registered");
-            }
+            } catch (e) { }
         }
     </script>
 </body>
