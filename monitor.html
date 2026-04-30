@@ -12,6 +12,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: radial-gradient(circle at top right, #2e1065, #0f172a);
             min-height: 100vh;
+            transition: background 0.5s ease;
         }
 
         .glass {
@@ -40,7 +41,6 @@
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
 
-        /* --- Animation Styles --- */
         #leaderboard {
             position: relative;
         }
@@ -48,21 +48,25 @@
         .player-row {
             position: absolute;
             width: 100%;
-            /* SLOWER REARRANGEMENT: increased to 1.2s and made it smoother */
             transition: top 1.2s cubic-bezier(0.45, 0, 0.55, 1);
             left: 0;
         }
 
-        /* Smoothly animate the bar width alongside the move */
         .progress-fill {
             transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #leaderboard::-webkit-scrollbar { width: 4px; }
         #leaderboard::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); border-radius: 10px; }
+
+        /* Fullscreen Button Hover */
+        .fs-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
     </style>
 </head>
-<body class="p-8 md:p-16 overflow-hidden">
+<body class="p-8 md:p-16 overflow-hidden" id="main-body">
     
     <div class="flex justify-between items-end mb-16 border-b border-white/10 pb-10">
         <div class="flex items-center gap-6">
@@ -81,9 +85,16 @@
                 </div>
             </div>
         </div>
-        <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
-            <span class="text-slate-300 text-xs font-bold uppercase tracking-widest">Global Status</span>
-            <span class="text-emerald-400 font-black text-sm uppercase">Active</span>
+        
+        <div class="flex items-center gap-3">
+            <button onclick="toggleFullscreen()" class="fs-btn glass px-4 py-3 rounded-2xl text-slate-300 transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                <span id="fs-icon">⛶</span> <span id="fs-text">Fullscreen</span>
+            </button>
+
+            <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
+                <span class="text-slate-300 text-xs font-bold uppercase tracking-widest">Global Status</span>
+                <span class="text-emerald-400 font-black text-sm uppercase">Active</span>
+            </div>
         </div>
     </div>
 
@@ -119,6 +130,21 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec";
         const ROW_HEIGHT = 85; 
+
+        // --- Fullscreen Logic ---
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+                document.getElementById('fs-text').innerText = "Exit";
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    document.getElementById('fs-text').innerText = "Fullscreen";
+                }
+            }
+        }
 
         async function sync() {
             try {
@@ -178,7 +204,6 @@
                             lbContainer.appendChild(playerRow);
                         }
 
-                        // Update top position (now takes 1.2s)
                         playerRow.style.top = `${idx * ROW_HEIGHT}px`;
                         playerRow.querySelector('.rank-text').innerText = (idx + 1).toString().padStart(2, '0');
                         playerRow.querySelector('.score-text').innerText = player.score.toLocaleString();
@@ -193,7 +218,6 @@
             }
         }
 
-        // Slightly slower sync interval to match the slower animation
         setInterval(sync, 1500);
         sync();
     </script>
