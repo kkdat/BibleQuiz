@@ -48,14 +48,14 @@
         .player-row {
             position: absolute;
             width: 100%;
-            /* Animates position (top) */
-            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* SLOWER REARRANGEMENT: increased to 1.2s and made it smoother */
+            transition: top 1.2s cubic-bezier(0.45, 0, 0.55, 1);
             left: 0;
         }
 
-        /* Smoothly animate the bar width */
+        /* Smoothly animate the bar width alongside the move */
         .progress-fill {
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #leaderboard::-webkit-scrollbar { width: 4px; }
@@ -139,7 +139,8 @@
 
                     if(data.reveal === true || data.reveal === "true") {
                         ansText.innerText = data.answer;
-                        ansContainer.classList.remove('hidden').add('flex');
+                        ansContainer.classList.remove('hidden');
+                        ansContainer.classList.add('flex');
                     } else {
                         ansContainer.classList.replace('flex', 'hidden');
                     }
@@ -162,7 +163,6 @@
                             playerRow = document.createElement('div');
                             playerRow.id = `player-${safeId}`;
                             playerRow.className = 'player-row space-y-3 group';
-                            // Initial scaffold
                             playerRow.innerHTML = `
                                 <div class="flex justify-between items-end">
                                     <div class="flex items-center gap-3">
@@ -178,12 +178,11 @@
                             lbContainer.appendChild(playerRow);
                         }
 
-                        // Update dynamic parts without rebuilding the whole row
+                        // Update top position (now takes 1.2s)
                         playerRow.style.top = `${idx * ROW_HEIGHT}px`;
                         playerRow.querySelector('.rank-text').innerText = (idx + 1).toString().padStart(2, '0');
                         playerRow.querySelector('.score-text').innerText = player.score.toLocaleString();
                         
-                        // This triggers the width animation
                         const fillBar = playerRow.querySelector('.progress-fill');
                         const newWidth = (player.score / maxScore) * 100;
                         fillBar.style.width = `${newWidth}%`;
@@ -194,7 +193,8 @@
             }
         }
 
-        setInterval(sync, 1250);
+        // Slightly slower sync interval to match the slower animation
+        setInterval(sync, 1500);
         sync();
     </script>
 </body>
