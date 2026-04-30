@@ -6,7 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <title>Monitor - Bible Quiz Pro</title>
-     <link rel="icon" type="image/png" href="IBMP.png">
+    <link rel="icon" type="image/png" href="IBMP.png">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -19,6 +19,17 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Glass effect applied directly to the logo image without a background box */
+        .logo-glass-effect {
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-glass-effect:hover {
+            transform: translateY(-2px);
         }
 
         .text-gradient-purple {
@@ -43,17 +54,21 @@
 <body class="p-8 md:p-16 overflow-hidden">
     
     <div class="flex justify-between items-end mb-16 border-b border-white/10 pb-10">
-        <div>
-            <h1 class="uppercase tracking-[0.4em] font-extrabold text-3xl">
-                <span class="text-purple-400">Balikatan</span> 
-                <span class="text-indigo-400">Bible Quiz</span>
-            </h1>
-            <div class="flex items-center gap-3 mt-2">
-                <span class="relative flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                </span>
-                <p id="status-tag" class="text-slate-300 font-bold text-xs uppercase tracking-[0.2em]">Live Signal: Encrypted</p>
+        <div class="flex items-center gap-6">
+            <img src="IBMP.png" alt="Logo" class="w-20 h-20 object-contain logo-glass-effect">
+            
+            <div>
+                <h1 class="uppercase tracking-[0.4em] font-extrabold text-3xl">
+                    <span class="text-purple-400">Balikatan</span> 
+                    <span class="text-indigo-400">Bible Quiz</span>
+                </h1>
+                <div class="flex items-center gap-3 mt-2">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                    </span>
+                    <p id="status-tag" class="text-slate-300 font-bold text-xs uppercase tracking-[0.2em]">Live Signal: Encrypted</p>
+                </div>
             </div>
         </div>
         <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
@@ -72,7 +87,7 @@
                 Ready for the next Question...
             </div>
             
-            <div id="mon-ans-container" class="absolute inset-0 glass bg-purple-950/90 hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border-purple-500/40 reveal-anim z-20 shadow-2xl">
+            <div id="mon-ans-container" class="absolute inset-0 bg-purple-950/90 backdrop-blur-2xl hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border border-purple-500/40 reveal-anim z-20 shadow-2xl">
                 <span class="text-emerald-400 font-bold tracking-[0.4em] uppercase text-sm mb-6 bg-emerald-500/10 px-4 py-1 rounded-full border border-emerald-500/20">Correct Answer</span>
                 <div id="mon-ans-text" class="text-7xl md:text-9xl font-black text-white uppercase tracking-tight drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]">
                     ---
@@ -85,9 +100,8 @@
                 <h2 class="text-white uppercase tracking-widest font-extrabold mb-8 text-sm flex items-center gap-2">
                     <span class="w-2 h-2 bg-purple-500 rounded-full"></span> Top Contenders
                 </h2>
-                
                 <div id="leaderboard" class="space-y-8 overflow-y-auto pr-4 flex-grow">
-                    </div>
+                </div>
             </div>
         </div>
     </div>
