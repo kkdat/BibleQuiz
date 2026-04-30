@@ -3,106 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <title>Score Control - Bible Quiz Pro</title>
-     <link rel="icon" type="image/png" href="IBMP.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at top left, #2e1065, #0f172a);
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #020617);
             min-height: 100vh;
         }
-        /* Refined lighter glass effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        /* Lighter, elevated card style */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
-        }
-        /* Sublte purple tint to separate teams */
+
         .team-card {
-            background: rgba(167, 139, 250, 0.08);
-            border-color: rgba(167, 139, 250, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .text-gradient {
-            background: linear-gradient(to right, #c084fc, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .team-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(167, 139, 250, 0.3);
+            background: rgba(255, 255, 255, 0.05);
         }
+
+        .score-glow {
+            text-shadow: 0 0 20px rgba(129, 140, 248, 0.4);
+        }
+
+        @keyframes success-flash {
+            0% { background-color: rgba(16, 185, 129, 0); }
+            50% { background-color: rgba(16, 185, 129, 0.15); }
+            100% { background-color: rgba(16, 185, 129, 0); }
+        }
+        .flash-success { animation: success-flash 0.4s ease-out; }
     </style>
 </head>
-<body class="text-slate-200 p-4 md:p-12">
+<body class="text-slate-100 antialiased p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-6">
-            <div class="text-center sm:text-left">
-                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gradient">Score Central</h1>
-                <div class="flex items-center justify-center sm:justify-start gap-2 mt-2">
-                    <div id="sync-indicator" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <p id="status-text" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Synced</p>
+    <div class="max-w-7xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                    Score Central
+                </h1>
+                <div class="flex items-center justify-center md:justify-start gap-3 mt-2">
+                    <div id="sync-indicator" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                    <p id="status-text" class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">System Online</p>
                 </div>
             </div>
             
-            <div class="flex flex-wrap justify-center gap-3">
-                <button onclick="resetAllScores()" class="glass px-4 py-1.5 rounded-xl text-[10px] font-bold text-red-400 hover:bg-red-500/10 transition border-red-500/20 uppercase tracking-tighter">
-                    Reset All
+            <div class="flex gap-3">
+                <button onclick="fetchLatestFromSheet()" class="glass-panel px-5 py-2 rounded-xl text-[10px] font-bold hover:bg-white/10 transition-all">
+                    REFRESH DATA
                 </button>
-                <button onclick="fetchLatestFromSheet()" class="glass px-4 py-1.5 rounded-xl text-[10px] font-bold text-purple-300 hover:bg-purple-500/20 transition uppercase tracking-tighter">
-                    Refresh
+                <button onclick="resetAllScores()" class="bg-red-500/10 border border-red-500/20 px-5 py-2 rounded-xl text-[10px] font-bold text-red-400 hover:bg-red-600 hover:text-white transition-all">
+                    RESET ALL
                 </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <script>
-                const teams = ["TEAM 1", "TEAM 2", "TEAM 3", "TEAM 4"];
-                const points = [50, 75, 100, 150, 200, 250, 300, 400, 500];
-                
-                teams.forEach(team => {
-                    document.write(`
-                    <div class="glass-card team-card rounded-[2rem] p-5 text-center relative overflow-hidden group">
-                        <h2 class="text-[10px] font-bold text-purple-300 mb-1 uppercase tracking-widest opacity-80">${team}</h2>
-                        <div id="score-${team}" class="text-5xl font-black text-white mb-4 tracking-tighter tabular-nums">0</div>
-                        
-                        <div class="grid grid-cols-3 gap-2 mb-4">
-                            ${points.map(pt => `
-                                <button onclick="pushUpdate('${team}', ${pt})" class="bg-emerald-600/80 hover:bg-emerald-500 text-white text-[10px] font-bold py-2 rounded-md transition-all active:scale-90 shadow-sm">
-                                    +${pt}
-                                </button>
-                            `).join('')}
-                        </div>
-                        
-                        <div class="flex flex-col gap-2 border-t border-white/10 pt-4">
-                             <button onclick="pushUpdate('${team}', 20)" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 text-xs rounded-xl font-black transition-all active:scale-95">
-                                BONUS +20
-                            </button>
-                            <button onclick="resetIndividualScore('${team}')" class="text-[9px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest transition">
-                                Reset Team
-                            </button>
-                        </div>
-                    </div>
-                    `);
-                });
-            </script>
-        </div>
+        <div id="teams-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwF9VR8YQ2UehcXHf-tZWaZDI0HdCCLF4r-x1s5fzH-D8qaVJPj6v21rr7HMViu6hNK/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwF9VR8YQ2UehcXHf-tZWaZDI0HdCCLF4r-x1s5fzH-D8qaVJPj6v21rr7HMViu6hNK/exec";
+        const teams = ["TEAM 1", "TEAM 2", "TEAM 3", "TEAM 4"];
+        const points = [50, 75, 100, 150, 200, 250, 300, 400, 500];
 
-        window.onload = () => {
-            fetchLatestFromSheet();
-            setInterval(fetchLatestFromSheet, 5000);
-        };
+        // Initialize UI
+        const container = document.getElementById('teams-container');
+        teams.forEach(team => {
+            container.innerHTML += `
+                <div id="card-${team}" class="glass-panel team-card rounded-[2rem] p-6 flex flex-col items-center">
+                    <span class="text-[10px] font-black text-purple-400 tracking-[0.2em] uppercase mb-1 opacity-70">${team}</span>
+                    <div id="score-${team}" class="text-5xl font-black text-white mb-6 score-glow tabular-nums">0</div>
+                    
+                    <div class="grid grid-cols-3 gap-2 w-full mb-5">
+                        ${points.map(pt => `
+                            <button onclick="pushUpdate('${team}', ${pt})" class="bg-emerald-600/20 hover:bg-emerald-500 text-white text-[10px] font-bold py-2.5 rounded-lg transition-all border border-emerald-500/20 active:scale-90">
+                                +${pt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="w-full space-y-3 pt-5 border-t border-white/10">
+                        <button onclick="pushUpdate('${team}', 20)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-[11px] font-black transition-all active:scale-95 shadow-lg shadow-indigo-900/20">
+                            BONUS +20
+                        </button>
+                        <button onclick="resetIndividualScore('${team}')" class="w-full text-[9px] font-bold text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest">
+                            Reset Team
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
 
         async function fetchLatestFromSheet() {
             try {
@@ -110,9 +109,20 @@
                 const data = await res.json();
                 data.players.forEach(p => {
                     const el = document.getElementById(`score-${p.name}`);
-                    if (el) el.innerText = p.score;
+                    if (el) {
+                        const targetScore = parseInt(p.score);
+                        // Animate number if it changed
+                        if(parseInt(el.innerText) !== targetScore) {
+                            gsap.to(el, {
+                                innerText: targetScore,
+                                duration: 0.8,
+                                snap: { innerText: 1 },
+                                ease: "power2.out"
+                            });
+                        }
+                    }
                 });
-                updateStatus("Synced", "bg-green-500");
+                updateStatus("Synced", "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]");
             } catch (e) {
                 updateStatus("Offline", "bg-red-500");
             }
@@ -120,8 +130,19 @@
 
         async function pushUpdate(teamName, points) {
             const el = document.getElementById(`score-${teamName}`);
+            const card = document.getElementById(`card-${teamName}`);
             const currentScore = parseInt(el.innerText);
-            el.innerText = currentScore + points;
+            
+            // Visual feedback
+            card.classList.add('flash-success');
+            setTimeout(() => card.classList.remove('flash-success'), 400);
+            
+            // Local update for instant feel
+            gsap.to(el, {
+                innerText: currentScore + points,
+                duration: 0.4,
+                snap: { innerText: 1 }
+            });
             
             updateStatus("Updating...", "bg-yellow-500");
 
@@ -150,9 +171,10 @@
         }
 
         async function resetAllScores() {
-            if(!confirm("Reset all scores?")) return;
+            if(!confirm("Are you sure you want to reset ALL scores?")) return;
             updateStatus("Resetting...", "bg-red-500");
-            for (const team of ["TEAM 1", "TEAM 2", "TEAM 3", "TEAM 4"]) {
+            
+            for (const team of teams) {
                 const el = document.getElementById(`score-${team}`);
                 const currentScore = parseInt(el.innerText);
                 if (currentScore !== 0) {
@@ -167,9 +189,13 @@
         }
 
         function updateStatus(text, colorClass) {
+            const indicator = document.getElementById('sync-indicator');
             document.getElementById('status-text').innerText = text;
-            document.getElementById('sync-indicator').className = `w-2 h-2 rounded-full animate-pulse ${colorClass}`;
+            indicator.className = `w-2.5 h-2.5 rounded-full transition-all duration-300 ${colorClass}`;
         }
+
+        setInterval(fetchLatestFromSheet, 5000);
+        window.onload = fetchLatestFromSheet;
     </script>
 </body>
 </html>
