@@ -59,11 +59,6 @@
         #leaderboard::-webkit-scrollbar { width: 4px; }
         #leaderboard::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); border-radius: 10px; }
 
-        .fs-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
         /* Initial Setup Overlay */
         #setup-overlay {
             position: fixed;
@@ -111,10 +106,6 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <button onclick="toggleFullscreen()" class="fs-btn glass px-4 py-3 rounded-2xl text-slate-300 transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                    <span id="fs-icon">⛶</span> <span id="fs-text">Fullscreen</span>
-                </button>
-
                 <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
                     <span class="text-slate-300 text-xs font-bold uppercase tracking-widest">Global Status</span>
                     <span class="text-emerald-400 font-black text-sm uppercase">Active</span>
@@ -156,12 +147,10 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec";
         const ROW_HEIGHT = 85; 
 
-        // --- Improved Fullscreen Logic ---
         function startMonitor() {
             enterFullscreen();
             document.getElementById('setup-overlay').style.display = 'none';
             document.getElementById('content-wrapper').classList.remove('opacity-0');
-            // Start the sync only after the user interacts
             setInterval(sync, 1500);
             sync();
         }
@@ -171,29 +160,7 @@
             if (doc.requestFullscreen) doc.requestFullscreen();
             else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
             else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
-            
-            document.getElementById('fs-text').innerText = "Exit";
         }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                enterFullscreen();
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                    document.getElementById('fs-text').innerText = "Fullscreen";
-                }
-            }
-        }
-
-        // Handle ESC key or manual exit to update button text
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                document.getElementById('fs-text').innerText = "Fullscreen";
-            } else {
-                document.getElementById('fs-text').innerText = "Exit";
-            }
-        });
 
         async function sync() {
             try {
