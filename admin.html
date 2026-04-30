@@ -6,7 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <title>Admin - Bible Quiz Pro</title>
-     <link rel="icon" type="image/png" href="IBMP.png">
+    <link rel="icon" type="image/png" href="IBMP.png">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -60,6 +60,11 @@
             </div>
             <div class="flex items-center gap-4">
                 <button onclick="clearHistory()" class="text-[10px] font-bold text-slate-400 hover:text-red-400 uppercase tracking-widest transition">Clear History</button>
+                
+                <button onclick="toggleFullscreen()" class="px-4 py-2 rounded-full glass text-[10px] font-bold text-slate-300 hover:text-white uppercase tracking-widest transition flex items-center gap-2">
+                    <span id="fs-icon">⛶</span> <span id="fs-text">Fullscreen</span>
+                </button>
+
                 <div class="px-4 py-2 rounded-full glass text-xs font-semibold flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> SYSTEM LIVE
                 </div>
@@ -133,6 +138,21 @@
             { id: 20, p: 250, q: "What was the name of the King of Salem and 'Priest of God Most High' who blessed Abraham?", ans: "Melchizedek", t: 10 }
         ];
 
+        // --- Fullscreen Feature ---
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error: ${err.message}`);
+                });
+                document.getElementById('fs-text').innerText = "Exit";
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    document.getElementById('fs-text').innerText = "Fullscreen";
+                }
+            }
+        }
+
         function renderGrid() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -140,8 +160,6 @@
                 const isPlayed = playedQuestions.includes(item.id);
                 const btn = document.createElement('div');
                 btn.id = `box-${item.id}`;
-                
-                // ADJUSTMENT: p-12 (larger padding) for a bigger box container
                 btn.className = `glass-card card-purple p-12 rounded-[2rem] cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
                 
                 btn.innerHTML = `
@@ -161,7 +179,6 @@
             });
         }
 
-        // Logic remains the same
         function openQuestion(item) {
             activeQ = item;
             timeLeft = item.t;
