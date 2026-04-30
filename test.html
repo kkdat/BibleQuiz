@@ -42,14 +42,20 @@
 
         /* --- Animation Styles --- */
         #leaderboard {
-            position: relative; /* Necessary for absolute children */
+            position: relative;
         }
 
         .player-row {
             position: absolute;
             width: 100%;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* Animates position (top) */
+            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             left: 0;
+        }
+
+        /* Smoothly animate the bar width */
+        .progress-fill {
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #leaderboard::-webkit-scrollbar { width: 4px; }
@@ -112,7 +118,7 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec";
-        const ROW_HEIGHT = 85; // Pixels per leaderboard item
+        const ROW_HEIGHT = 85; 
 
         async function sync() {
             try {
@@ -125,7 +131,6 @@
                 const ansText = document.getElementById('mon-ans-text');
                 const lbContainer = document.getElementById('leaderboard');
 
-                // --- UI Logic ---
                 if(data.status === "ACTIVE") {
                     qEl.innerText = data.question;
                     pEl.innerText = data.points + " POINTS";
@@ -134,8 +139,7 @@
 
                     if(data.reveal === true || data.reveal === "true") {
                         ansText.innerText = data.answer;
-                        ansContainer.classList.remove('hidden');
-                        ansContainer.classList.add('flex');
+                        ansContainer.classList.remove('hidden').add('flex');
                     } else {
                         ansContainer.classList.replace('flex', 'hidden');
                     }
@@ -146,38 +150,43 @@
                     ansContainer.classList.add('hidden');
                 }
 
-                // --- Re-orderable Leaderboard Logic ---
                 if (data.players && data.players.length > 0) {
                     const sortedPlayers = data.players.sort((a, b) => b.score - a.score);
                     const maxScore = Math.max(...sortedPlayers.map(p => p.score), 1);
 
                     sortedPlayers.forEach((player, idx) => {
-                        let playerRow = document.getElementById(`player-${player.name.replace(/\s+/g, '')}`);
+                        const safeId = player.name.replace(/\s+/g, '');
+                        let playerRow = document.getElementById(`player-${safeId}`);
                         
-                        // Create element if it doesn't exist
                         if (!playerRow) {
                             playerRow = document.createElement('div');
-                            playerRow.id = `player-${player.name.replace(/\s+/g, '')}`;
+                            playerRow.id = `player-${safeId}`;
                             playerRow.className = 'player-row space-y-3 group';
+                            // Initial scaffold
+                            playerRow.innerHTML = `
+                                <div class="flex justify-between items-end">
+                                    <div class="flex items-center gap-3">
+                                        <span class="rank-text text-xs font-bold text-slate-400"></span>
+                                        <span class="font-bold text-xl uppercase tracking-tighter text-white">${player.name}</span>
+                                    </div>
+                                    <span class="score-text text-purple-300 font-mono font-bold text-lg"></span>
+                                </div>
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                    <div class="progress-fill h-full bg-gradient-to-r from-purple-500 to-indigo-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]" style="width: 0%"></div>
+                                </div>
+                            `;
                             lbContainer.appendChild(playerRow);
                         }
 
-                        // Update Position and Content
+                        // Update dynamic parts without rebuilding the whole row
                         playerRow.style.top = `${idx * ROW_HEIGHT}px`;
+                        playerRow.querySelector('.rank-text').innerText = (idx + 1).toString().padStart(2, '0');
+                        playerRow.querySelector('.score-text').innerText = player.score.toLocaleString();
                         
-                        playerRow.innerHTML = `
-                            <div class="flex justify-between items-end">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-xs font-bold text-slate-400">${(idx + 1).toString().padStart(2, '0')}</span>
-                                    <span class="font-bold text-xl uppercase tracking-tighter text-white">${player.name}</span>
-                                </div>
-                                <span class="text-purple-300 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
-                            </div>
-                            <div class="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-400 transition-all duration-1000 shadow-[0_0_15px_rgba(168,85,247,0.3)]" 
-                                     style="width: ${(player.score / maxScore) * 100}%"></div>
-                            </div>
-                        `;
+                        // This triggers the width animation
+                        const fillBar = playerRow.querySelector('.progress-fill');
+                        const newWidth = (player.score / maxScore) * 100;
+                        fillBar.style.width = `${newWidth}%`;
                     });
                 }
             } catch(e) {
