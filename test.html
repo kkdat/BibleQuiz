@@ -5,301 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <title>Admin - Bible Quiz Pro</title>
-    <link rel="icon" type="image/png" href="IBMP.png">
+    <title>Monitor - Bible Quiz Pro</title>
+     <link rel="icon" type="image/png" href="IBMP.png">
     <style>
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --purple-glow: rgba(167, 139, 250, 0.3);
-        }
-
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #0f172a;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(76, 29, 149, 0.4) 0, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.4) 0, transparent 50%);
+            background: radial-gradient(circle at top right, #2e1065, #0f172a);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Animated background blobs */
-        .blob {
-            position: fixed;
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
-            filter: blur(100px);
-            border-radius: 50%;
-            z-index: -1;
-            opacity: 0.2;
-            animation: move 20s infinite alternate;
-        }
-
-        @keyframes move {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(20%, 20%); }
-        }
-
-        /* Ultimate Glass Effect */
         .glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        /* Glossy Button Style */
-        .glass-button {
-            position: relative;
             background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .glass-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
-            transition: 0.5s;
+        /* Added Logo Glass Style */
+        .glass-logo {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05), 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        .glass-button:hover::before {
-            left: 100%;
-        }
-
-        .glass-button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(167, 139, 250, 0.5);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px -5px var(--purple-glow);
-        }
-
-        .spent {
-            opacity: 0.2;
-            filter: grayscale(1) blur(1px);
-            pointer-events: none;
-        }
-
-        .text-gradient {
-            background: linear-gradient(to right, #ddd6fe, #818cf8);
+        .text-gradient-purple {
+            background: linear-gradient(to right, #c084fc, #818cf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .reveal-anim { 
+            animation: reveal-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+
+        @keyframes reveal-pop {
+            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        #leaderboard::-webkit-scrollbar { width: 4px; }
+        #leaderboard::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); border-radius: 10px; }
     </style>
 </head>
-<body class="text-slate-200 p-6 md:p-12">
-    <div class="blob"></div>
-
-    <div class="max-w-7xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-16 gap-6">
-            <div class="text-center md:text-left">
-                <h1 class="text-5xl font-black tracking-tighter text-gradient">Briefcase Control</h1>
-                <p class="text-slate-400 text-xs mt-2 uppercase tracking-[0.3em] font-bold">Admin Ops Center v3.0</p>
+<body class="p-8 md:p-16 overflow-hidden">
+    
+    <div class="flex justify-between items-end mb-16 border-b border-white/10 pb-10">
+        <div class="flex items-center gap-6">
+            <div class="w-16 h-16 glass-logo rounded-2xl flex items-center justify-center p-2">
+                <img src="IBMP.png" alt="Logo" class="w-full h-full object-contain filter drop-shadow-md">
             </div>
-            
-            <div class="flex items-center gap-6 glass px-6 py-3 rounded-2xl">
-                <button onclick="clearHistory()" class="text-[10px] font-black text-slate-400 hover:text-red-400 uppercase tracking-widest transition">Reset All Boxes</button>
-                <div class="h-4 w-[1px] bg-white/10"></div>
-                <div class="flex items-center gap-2">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            <div>
+                <h1 class="uppercase tracking-[0.4em] font-extrabold text-3xl">
+                    <span class="text-purple-400">Balikatan</span> 
+                    <span class="text-indigo-400">Bible Quiz</span>
+                </h1>
+                <div class="flex items-center gap-3 mt-2">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
                     </span>
-                    <span class="text-[10px] font-black tracking-widest">LIVE</span>
+                    <p id="status-tag" class="text-slate-300 font-bold text-xs uppercase tracking-[0.2em]">Live Signal: Encrypted</p>
                 </div>
             </div>
-        </header>
-        
-        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10"></div>
+        </div>
+        <div class="glass px-6 py-3 rounded-2xl flex items-center gap-4">
+            <span class="text-slate-300 text-xs font-bold uppercase tracking-widest">Global Status</span>
+            <span class="text-emerald-400 font-black text-sm uppercase">Active</span>
+        </div>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xl hidden flex items-center justify-center p-4 z-50">
-        <div class="glass border-white/20 p-1 rounded-[2.5rem] max-w-lg w-full shadow-2xl overflow-hidden">
-            <div class="bg-slate-900/40 p-8 rounded-[2.3rem]">
-                <div class="flex justify-between items-start mb-10">
-                    <div class="glass px-4 py-2 rounded-xl">
-                        <p class="text-[10px] font-black text-purple-400 uppercase">Stake</p>
-                        <div id="m-pts" class="text-3xl font-black">0</div>
-                    </div>
-                    <div class="text-right glass px-4 py-2 rounded-xl border-amber-500/20">
-                        <p class="text-[10px] font-black text-amber-400 uppercase">Timer</p>
-                        <div id="m-timer" class="text-3xl font-black tabular-nums">0s</div>
-                    </div>
+    <div class="grid grid-cols-12 gap-16 h-[65vh] items-start">
+        <div class="col-span-8 flex flex-col justify-center h-full relative pr-4">
+            <div id="mon-pts" class="mb-6 text-xl text-slate-900 font-black hidden uppercase tracking-[0.3em] bg-purple-300 w-fit px-5 py-1.5 rounded-full border border-purple-400 shadow-lg">
+                0 POINTS
+            </div>
+            
+            <div id="mon-q" class="text-6xl md:text-7xl font-extrabold leading-[1.15] text-white transition-all duration-700 ease-out drop-shadow-md">
+                Ready for the next Question...
+            </div>
+            
+            <div id="mon-ans-container" class="absolute inset-0 glass bg-purple-950/90 hidden flex-col items-center justify-center text-center p-12 rounded-[3rem] border-purple-500/40 reveal-anim z-20 shadow-2xl">
+                <span class="text-emerald-400 font-bold tracking-[0.4em] uppercase text-sm mb-6 bg-emerald-500/10 px-4 py-1 rounded-full border border-emerald-500/20">Correct Answer</span>
+                <div id="mon-ans-text" class="text-7xl md:text-9xl font-black text-white uppercase tracking-tight drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]">
+                    ---
                 </div>
-
-                <div class="bg-white/5 rounded-3xl p-8 mb-8 border border-white/5 relative">
-                    <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+            </div>
+        </div>
+        
+        <div class="col-span-4 h-full flex flex-col">
+            <div class="glass rounded-[2rem] p-8 h-full flex flex-col border-white/5">
+                <h2 class="text-white uppercase tracking-widest font-extrabold mb-8 text-sm flex items-center gap-2">
+                    <span class="w-2 h-2 bg-purple-500 rounded-full"></span> Top Contenders
+                </h2>
+                
+                <div id="leaderboard" class="space-y-8 overflow-y-auto pr-4 flex-grow">
                     </div>
-                    <p class="text-[10px] text-purple-300 uppercase font-black mb-4 tracking-widest">Question Fragment</p>
-                    <p id="m-que" class="text-2xl font-semibold leading-tight text-white"></p>
-                </div>
-
-                <div id="answer-box" class="mb-8 hidden animate-bounce">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 text-center">
-                        <p id="m-ans" class="text-3xl font-black text-emerald-400 uppercase tracking-tight"></p>
-                    </div>
-                </div>
-
-                <div id="control-btns" class="grid gap-4">
-                    <button id="pushBtn" onclick="pushToLive()" class="glass-button bg-purple-600/80 hover:bg-purple-600 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3">
-                        🚀 Push to Monitor
-                    </button>
-                    <button id="revealBtn" onclick="revealAnswer()" class="glass-button bg-amber-500 hover:bg-amber-400 text-slate-900 py-5 rounded-2xl font-black text-sm uppercase tracking-widest hidden">
-                        Reveal Answer
-                    </button>
-                    <button onclick="closeModal()" class="py-3 text-slate-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest">
-                        Close Session
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ... (Script remains exactly the same as your provided logic)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec"; 
-        let activeQ = null;
-        let countdownInterval = null;
-        let timeLeft = 0;
-        let playedQuestions = JSON.parse(localStorage.getItem('playedBibleQuiz')) || [];
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec";
 
-        const questions = [
-            { id: 1, p: 50, q: "Who was swallowed by a great fish?", ans: "Jonah", t: 10 },
-            { id: 2, p: 50, q: "How many days did it rain during the Great Flood?", ans: "40", t: 10 },
-            { id: 3, p: 75, q: "What was the first book of the Bible?", ans: "Genesis", t: 10 },
-            { id: 4, p: 75, q: "Who received the Ten Commandments?", ans: "Moses", t:10 },
-            { id: 5, p: 100, q: "What did David use to defeat Goliath?", ans: "Slingshot", t: 10 },
-            { id: 6, p: 100, q: "How many disciples did Jesus have?", ans: "12", t: 10 },
-            { id: 7, p: 150, q: "Who was the oldest man in the Bible?", ans: "Methuselah", t: 10 },
-            { id: 8, p: 150, q: "What was the secret to Samson's strength?", ans: "His hair", t: 10 },
-            { id: 9, p: 200, q: "Which city's walls fell after Israel marched around it?", ans: "Jericho", t: 10 },
-            { id: 10, p: 200, q: "What did God use to lead the Israelites by night?", ans: "A pillar of fire", t: 10 },
-            { id: 11, p: 250, q: "Who was known as the 'Dreamer'?", ans: "Joseph", t: 10 },
-            { id: 12, p: 250, q: "What is the shortest verse in the Bible?", ans: "Jesus wept", t: 10 },
-            { id: 13, p: 250, q: "Which apostle was a tax collector?", ans: "Matthew", t: 10 },
-            { id: 14, p: 300, q: "What was the first miracle performed by Jesus?", ans: "Water to wine", t: 10 },
-            { id: 15, p: 300, q: "How many plagues did God send upon Egypt?", ans: "10", t: 10 },
-            { id: 16, p: 400, q: "Who wrote the most books in the New Testament?", ans: "Paul", t: 10 },
-            { id: 17, p: 400, q: "On what island was John when he wrote Revelation?", ans: "Patmos", t: 10 },
-            { id: 18, p: 500, q: "Who was the first King of Israel?", ans: "Saul", t: 10 },
-            { id: 19, p: 500, q: "What was the name of the mountain where Moses died?", ans: "Nebo", t: 10 },
-            { id: 20, p: 500, q: "Which tribe was responsible for the Tabernacle?", ans: "Levi", t: 10 }
-        ];
-
-        function renderGrid() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            questions.forEach(item => {
-                const isPlayed = playedQuestions.includes(item.id);
-                const btn = document.createElement('div');
-                btn.className = `glass-button glass p-10 rounded-[2.5rem] cursor-pointer flex flex-col items-center justify-center text-center group ${isPlayed ? 'spent' : ''}`;
+        async function sync() {
+            try {
+                const res = await fetch(`${SCRIPT_URL}?cb=${Date.now()}`);
+                const data = await res.json();
                 
-                btn.innerHTML = `
-                    <div class="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-500 shadow-xl border border-white/10">
-                        <span class="text-4xl">${isPlayed ? '🔒' : '💼'}</span>
-                    </div>
-                    <div class="text-[10px] font-black text-purple-300 tracking-[0.3em] uppercase">Box ${item.id}</div>
-                `;
+                const qEl = document.getElementById('mon-q');
+                const pEl = document.getElementById('mon-pts');
+                const ansContainer = document.getElementById('mon-ans-container');
+                const ansText = document.getElementById('mon-ans-text');
+                const lbContainer = document.getElementById('leaderboard');
 
-                btn.onclick = () => {
-                    if (playedQuestions.includes(item.id)) return;
-                    openQuestion(item);
-                };
-                grid.appendChild(btn);
-            });
-        }
+                if(data.status === "ACTIVE") {
+                    qEl.innerText = data.question;
+                    pEl.innerText = data.points + " POINTS";
+                    pEl.classList.remove('hidden');
+                    qEl.classList.replace('text-white/20', 'text-white');
 
-        function openQuestion(item) {
-            activeQ = item;
-            timeLeft = item.t;
-            document.getElementById('m-timer').innerText = timeLeft + "s";
-            document.getElementById('m-pts').innerText = item.p;
-            document.getElementById('m-que').innerText = item.q;
-            document.getElementById('m-ans').innerText = item.ans;
-            document.getElementById('answer-box').classList.add('hidden');
-            document.getElementById('revealBtn').classList.add('hidden');
-            document.getElementById('pushBtn').classList.remove('hidden');
-            document.getElementById('modal').classList.remove('hidden');
-            clearInterval(countdownInterval);
-        }
-
-        async function pushToLive() {
-            const btn = document.getElementById('pushBtn');
-            btn.innerHTML = "<span>⏳ SYNCING...</span>"; btn.disabled = true;
-            await fetch(SCRIPT_URL, {
-                method: "POST", mode: "no-cors",
-                body: JSON.stringify({ action: "pushQuestion", q: activeQ.q, p: activeQ.p, t: activeQ.t, ans: activeQ.ans, reveal: false })
-            });
-            if (!playedQuestions.includes(activeQ.id)) {
-                playedQuestions.push(activeQ.id);
-                localStorage.setItem('playedBibleQuiz', JSON.stringify(playedQuestions));
-                renderGrid();
-            }
-            btn.innerHTML = "<span>✅ BROADCASTING</span>";
-            btn.classList.replace('bg-purple-600/80', 'bg-blue-600/80');
-            startTimer();
-        }
-
-        function startTimer() {
-            clearInterval(countdownInterval);
-            const timerEl = document.getElementById('m-timer');
-            countdownInterval = setInterval(() => {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    timerEl.innerText = timeLeft + "s";
-                    if (timeLeft <= 5) timerEl.classList.add('text-red-500', 'animate-pulse');
+                    if(data.reveal === true || data.reveal === "true") {
+                        ansText.innerText = data.answer;
+                        ansContainer.classList.remove('hidden');
+                        ansContainer.classList.add('flex');
+                    } else {
+                        ansContainer.classList.replace('flex', 'hidden');
+                    }
                 } else {
-                    clearInterval(countdownInterval);
-                    timerEl.innerText = "END";
-                    document.getElementById('revealBtn').classList.remove('hidden');
-                    document.getElementById('pushBtn').classList.add('hidden');
+                    qEl.innerText = "Ready for the next Question...";
+                    qEl.classList.add('text-white/20');
+                    pEl.classList.add('hidden');
+                    ansContainer.classList.add('hidden');
                 }
-            }, 1000);
-        }
 
-        async function revealAnswer() {
-            document.getElementById('answer-box').classList.remove('hidden');
-            document.getElementById('revealBtn').classList.add('hidden');
-            await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "revealAnswer", reveal: true }) });
-        }
+                if (data.players && data.players.length > 0) {
+                    const sortedPlayers = data.players.sort((a, b) => b.score - a.score);
+                    const maxScore = Math.max(...sortedPlayers.map(p => p.score), 1);
 
-        function closeModal() { 
-            document.getElementById('modal').classList.add('hidden'); 
-            clearInterval(countdownInterval);
-            const btn = document.getElementById('pushBtn');
-            btn.className = "glass-button bg-purple-600/80 hover:bg-purple-600 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3";
-            btn.innerHTML = "🚀 Push to Monitor";
-            btn.disabled = false;
-        }
-
-        function clearHistory() {
-            if(confirm("Reset all boxes?")) {
-                playedQuestions = [];
-                localStorage.removeItem('playedBibleQuiz');
-                renderGrid();
+                    lbContainer.innerHTML = sortedPlayers.map((player, idx) => `
+                        <div class="space-y-3 group">
+                            <div class="flex justify-between items-end">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-bold text-slate-400">0${idx + 1}</span>
+                                    <span class="font-bold text-xl uppercase tracking-tighter text-white">${player.name}</span>
+                                </div>
+                                <span class="text-purple-300 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
+                            </div>
+                            <div class="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-400 transition-all duration-1000 shadow-[0_0_15px_rgba(168,85,247,0.3)]" 
+                                     style="width: ${(player.score / maxScore) * 100}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {
+                console.error("Monitor Sync Error:", e);
             }
         }
 
-        renderGrid();
+        setInterval(sync, 1250);
+        sync();
     </script>
 </body>
 </html>
