@@ -21,7 +21,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Glass effect applied directly to the logo image without a background box */
         .logo-glass-effect {
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
             position: relative;
@@ -30,12 +29,6 @@
         
         .logo-glass-effect:hover {
             transform: translateY(-2px);
-        }
-
-        .text-gradient-purple {
-            background: linear-gradient(to right, #c084fc, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
         .reveal-anim { 
@@ -47,6 +40,24 @@
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
 
+        /* --- Animation Styles --- */
+        #leaderboard {
+            position: relative;
+        }
+
+        .player-row {
+            position: absolute;
+            width: 100%;
+            /* SLOWER REARRANGEMENT: increased to 1.2s and made it smoother */
+            transition: top 1.2s cubic-bezier(0.45, 0, 0.55, 1);
+            left: 0;
+        }
+
+        /* Smoothly animate the bar width alongside the move */
+        .progress-fill {
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         #leaderboard::-webkit-scrollbar { width: 4px; }
         #leaderboard::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); border-radius: 10px; }
     </style>
@@ -56,7 +67,6 @@
     <div class="flex justify-between items-end mb-16 border-b border-white/10 pb-10">
         <div class="flex items-center gap-6">
             <img src="IBMP.png" alt="Logo" class="w-20 h-20 object-contain logo-glass-effect">
-            
             <div>
                 <h1 class="uppercase tracking-[0.4em] font-extrabold text-3xl">
                     <span class="text-purple-400">Balikatan</span> 
@@ -100,7 +110,7 @@
                 <h2 class="text-white uppercase tracking-widest font-extrabold mb-8 text-sm flex items-center gap-2">
                     <span class="w-2 h-2 bg-purple-500 rounded-full"></span> Top Contenders
                 </h2>
-                <div id="leaderboard" class="space-y-8 overflow-y-auto pr-4 flex-grow">
+                <div id="leaderboard" class="overflow-y-auto pr-4 flex-grow relative">
                 </div>
             </div>
         </div>
@@ -108,6 +118,7 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOw4fhoiz3QwwrcwczQauBjkvcLaUTlIqtKsNDppU1rIhjLwM1u4apqjuhq3xSqtTq/exec";
+        const ROW_HEIGHT = 85; 
 
         async function sync() {
             try {
@@ -144,28 +155,46 @@
                     const sortedPlayers = data.players.sort((a, b) => b.score - a.score);
                     const maxScore = Math.max(...sortedPlayers.map(p => p.score), 1);
 
-                    lbContainer.innerHTML = sortedPlayers.map((player, idx) => `
-                        <div class="space-y-3 group">
-                            <div class="flex justify-between items-end">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-xs font-bold text-slate-400">0${idx + 1}</span>
-                                    <span class="font-bold text-xl uppercase tracking-tighter text-white">${player.name}</span>
+                    sortedPlayers.forEach((player, idx) => {
+                        const safeId = player.name.replace(/\s+/g, '');
+                        let playerRow = document.getElementById(`player-${safeId}`);
+                        
+                        if (!playerRow) {
+                            playerRow = document.createElement('div');
+                            playerRow.id = `player-${safeId}`;
+                            playerRow.className = 'player-row space-y-3 group';
+                            playerRow.innerHTML = `
+                                <div class="flex justify-between items-end">
+                                    <div class="flex items-center gap-3">
+                                        <span class="rank-text text-xs font-bold text-slate-400"></span>
+                                        <span class="font-bold text-xl uppercase tracking-tighter text-white">${player.name}</span>
+                                    </div>
+                                    <span class="score-text text-purple-300 font-mono font-bold text-lg"></span>
                                 </div>
-                                <span class="text-purple-300 font-mono font-bold text-lg">${player.score.toLocaleString()}</span>
-                            </div>
-                            <div class="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-400 transition-all duration-1000 shadow-[0_0_15px_rgba(168,85,247,0.3)]" 
-                                     style="width: ${(player.score / maxScore) * 100}%"></div>
-                            </div>
-                        </div>
-                    `).join('');
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                    <div class="progress-fill h-full bg-gradient-to-r from-purple-500 to-indigo-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]" style="width: 0%"></div>
+                                </div>
+                            `;
+                            lbContainer.appendChild(playerRow);
+                        }
+
+                        // Update top position (now takes 1.2s)
+                        playerRow.style.top = `${idx * ROW_HEIGHT}px`;
+                        playerRow.querySelector('.rank-text').innerText = (idx + 1).toString().padStart(2, '0');
+                        playerRow.querySelector('.score-text').innerText = player.score.toLocaleString();
+                        
+                        const fillBar = playerRow.querySelector('.progress-fill');
+                        const newWidth = (player.score / maxScore) * 100;
+                        fillBar.style.width = `${newWidth}%`;
+                    });
                 }
             } catch(e) {
                 console.error("Monitor Sync Error:", e);
             }
         }
 
-        setInterval(sync, 1250);
+        // Slightly slower sync interval to match the slower animation
+        setInterval(sync, 1500);
         sync();
     </script>
 </body>
